@@ -15,7 +15,7 @@
 
     <AssemblyName>AIUsageWidget</AssemblyName>
     <RootNamespace>AIUsageWidget</RootNamespace>
-    <Version>0.0.1</Version>
+    <Version>0.0.2</Version>
     <Product>AIUsageWidget</Product>
     <Company>AIUsageWidget contributors</Company>
     <Copyright>Copyright (c) 2026 Chojema</Copyright>

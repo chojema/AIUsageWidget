@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.0.2 — 2026-10-18
+
+- Settings window (tray menu → Settings…, or click the tray icon).
+- Display mode: attach below the terminal window, or a standalone widget that can be dragged anywhere, remembers its position and can stay on top.
+- Keyboard input indicator (EN / 한) at the right end of the panel.
+- A saved widget position is kept inside the screen.
+
 ## 0.0.1 — 2026-10-18
 
 First release.

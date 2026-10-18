@@ -4,7 +4,7 @@ English | [한국어](README.ko.md)
 
 AIUsageWidget is a small desktop app for Windows and macOS. It shows a usage panel right below your terminal window, so you can see how much of your AI coding agent limits remain without leaving the terminal.
 
-> **Version 0.0.1 — early release.**
+> **Version 0.0.2 — early release.**
 > Windows is the primary platform and has been tested. The macOS build has not been tested yet.
 
 ## What it shows
@@ -18,7 +18,23 @@ For each supported agent:
 
 Reset times are shown as a clock time (with the weekday when more than a day away) and as time remaining. When a value is unavailable, the panel says why (not installed, not signed in, not connected, waiting for data) instead of showing a made-up number.
 
-## How the panel behaves
+## Display modes
+
+Choose the mode in **Settings** (tray menu → Settings…, or click the tray icon):
+
+| Mode | Behavior |
+|---|---|
+| **Attach below the terminal window** (default) | Shown only while a terminal is in front, as described below. |
+| **Standalone widget** | Always shown. Drag it anywhere; the position is remembered. Optionally kept above other windows. |
+
+## Keyboard input indicator
+
+The right end of the panel shows the keyboard input state of the window in front: **EN** or **한** (Korean), and the language code for other input methods (for example JA or ZH). It can be turned off in Settings.
+
+- Windows: read from the keyboard layout and the IME conversion mode of the focused window.
+- macOS: read from the current input source.
+
+## How the attached panel behaves
 
 - It appears directly below the frontmost terminal window and follows its position and width.
 - With several terminal windows open, it is shown only for the one in front.
@@ -53,14 +69,15 @@ Place the app in a permanent folder before connecting, because Claude Code runs 
 
 ## Install (Windows)
 
-1. Download `AIUsageWidget-0.0.1-win-x64.zip` from [Releases](https://github.com/chojema/AIUsageWidget/releases) and extract `AIUsageWidget.exe` to a permanent folder, for example `%LOCALAPPDATA%\Programs\AIUsageWidget`.
+1. Download `AIUsageWidget-0.0.2-win-x64.zip` from [Releases](https://github.com/chojema/AIUsageWidget/releases) and extract `AIUsageWidget.exe` to a permanent folder, for example `%LOCALAPPDATA%\Programs\AIUsageWidget`.
 2. Run `AIUsageWidget.exe`. An icon appears in the notification area (tray).
-3. Optional: choose **Connect Claude Code** and **Start at login** from the tray menu.
+3. Optional: open **Settings** to choose the display mode, connect Claude Code, or start at login.
 
 The executable is not code-signed yet, so Windows SmartScreen may show a warning on first run.
 
 ## Tray menu
 
+- **Settings…** (also opens with a click on the tray icon): display mode, widget on top, input indicator, start at login, language, Claude Code connection
 - **Language**: System default, English, or 한국어 (Korean)
 - **Connect / Disconnect Claude Code**
 - **Start at login** (Windows)
@@ -111,7 +128,7 @@ See [SECURITY.md](SECURITY.md) for how this repository keeps private data out of
 
 - Antigravity limits cannot be shown until an official interface exists.
 - Claude Code values update only while a Claude Code session is running.
-- macOS: untested in 0.0.1; start at login is not available yet.
+- macOS: untested so far; start at login is not available yet.
 - The panel follows a terminal window, not individual tabs inside it.
 
 ## License

@@ -6,6 +6,7 @@ using Avalonia.Platform;
 using Avalonia.Threading;
 using AIUsageWidget.Claude;
 using AIUsageWidget.Core;
+using AIUsageWidget.Ime;
 using AIUsageWidget.Localization;
 using AIUsageWidget.Platform.Mac;
 using AIUsageWidget.Platform.Windows;
@@ -15,8 +16,8 @@ using AIUsageWidget.Views;
 
 namespace AIUsageWidget;
 
-/// <summary>Connects providers, the foreground tracker, the panel and the tray menu.</summary>
-public sealed class AppController : IDisposable
+/// <summary>Connects providers, the foreground tracker, the panel, the settings window and the tray menu.</summary>
+public sealed class AppController : IDisposable, ISettingsHost
 {
     private readonly Application _app;
     private readonly IClassicDesktopStyleApplicationLifetime _desktop;
@@ -25,11 +26,16 @@ public sealed class AppController : IDisposable
     private readonly PanelWindow _panel = new();
     private readonly DispatcherTimer _trackTimer;
     private readonly DispatcherTimer _clockTimer;
+    private readonly DispatcherTimer _saveWidgetTimer;
     private IForegroundTracker? _tracker;
+    private IImeReader? _imeReader;
     private TrayIcon? _tray;
+    private SettingsWindow? _settingsWindow;
     private Strings _strings;
     private ScreenRect? _placed;
+    private string? _imeLabel;
     private bool _nativeStyleApplied;
+    private bool _placingWidget;
 
     public AppController(Application app, IClassicDesktopStyleApplicationLifetime desktop)
     {
@@ -37,13 +43,15 @@ public sealed class AppController : IDisposable
         _desktop = desktop;
         _strings = Strings.For(_settings.Language);
         _trackTimer = new DispatcherTimer(TimeSpan.FromMilliseconds(OperatingSystem.IsMacOS() ? 250 : 150),
-            DispatcherPriority.Background, (_, _) => Track());
+            DispatcherPriority.Background, (_, _) => Tick());
         _clockTimer = new DispatcherTimer(TimeSpan.FromSeconds(30), DispatcherPriority.Background, (_, _) => Render());
+        _saveWidgetTimer = new DispatcherTimer(TimeSpan.FromMilliseconds(600), DispatcherPriority.Background, (_, _) => SaveWidgetPosition());
+        _panel.PositionChanged += (_, _) => OnPanelMoved();
     }
 
     public void Start()
     {
-        _tracker = CreateTracker();
+        (_tracker, _imeReader) = CreatePlatformServices();
         foreach (IUsageProvider provider in _providers)
         {
             provider.Changed += _ => Dispatcher.UIThread.Post(Render);
@@ -51,21 +59,22 @@ public sealed class AppController : IDisposable
         }
         BuildTray();
         Render();
+        ApplyDisplayMode();
         _trackTimer.Start();
         _clockTimer.Start();
     }
 
-    private IForegroundTracker? CreateTracker()
+    private (IForegroundTracker?, IImeReader?) CreatePlatformServices()
     {
         if (OperatingSystem.IsWindows())
         {
-            return new WindowsForegroundTracker(_settings.ExtraTerminals);
+            return (new WindowsForegroundTracker(_settings.ExtraTerminals), new WindowsImeReader());
         }
         if (OperatingSystem.IsMacOS())
         {
-            return new MacForegroundTracker(MacScreens, _settings.ExtraTerminals);
+            return (new MacForegroundTracker(MacScreens, _settings.ExtraTerminals), new MacImeReader());
         }
-        return null;
+        return (null, null);
     }
 
     [System.Runtime.Versioning.SupportedOSPlatform("macos")]
@@ -75,38 +84,115 @@ public sealed class AppController : IDisposable
 
     private static ScreenRect ToRect(PixelRect r) => new(r.X, r.Y, r.Width, r.Height);
 
-    private void Track()
-    {
-        if (_tracker is null)
-        {
-            return;
-        }
+    // ----- Polling -----
 
+    private void Tick()
+    {
         ForegroundInfo info;
         try
         {
-            info = _tracker.Poll();
+            info = _tracker?.Poll() ?? ForegroundInfo.Other;
         }
         catch (Exception ex) when (ex is DllNotFoundException or EntryPointNotFoundException)
         {
-            _trackTimer.Stop();
-            return;
+            _tracker = null;
+            info = ForegroundInfo.Other;
+        }
+
+        if (info.Kind != ForegroundKind.Self)
+        {
+            UpdateIme();
+        }
+
+        if (_settings.DisplayMode == DisplayMode.Widget)
+        {
+            return; // The widget stays where the user put it.
         }
 
         switch (info.Kind)
         {
             case ForegroundKind.Terminal:
-                ShowAt(PanelPlacement.Compute(info.Terminal!), info.Terminal!.Scale);
+                ShowAttached(PanelPlacement.Compute(info.Terminal!), info.Terminal!.Scale);
                 break;
             case ForegroundKind.Other:
                 HidePanel();
                 break;
             case ForegroundKind.Self:
-                break; // Keep the current state while the tray menu or the panel itself is active.
+                break; // Keep the current state while the tray menu or settings window is active.
         }
     }
 
-    private void ShowAt(ScreenRect rect, double scale)
+    private void UpdateIme()
+    {
+        if (!_settings.ShowIme || _imeReader is null)
+        {
+            return;
+        }
+        string? label;
+        try
+        {
+            label = _imeReader.Read();
+        }
+        catch (Exception ex) when (ex is DllNotFoundException or EntryPointNotFoundException)
+        {
+            _imeReader = null;
+            label = null;
+        }
+        if (label != _imeLabel)
+        {
+            _imeLabel = label;
+            _panel.RenderIme(true, label, _strings);
+        }
+    }
+
+    // ----- Display modes -----
+
+    private void ApplyDisplayMode()
+    {
+        _placed = null;
+        _panel.Draggable = _settings.DisplayMode == DisplayMode.Widget;
+        if (_settings.DisplayMode == DisplayMode.Widget)
+        {
+            ShowWidget();
+        }
+        else
+        {
+            _panel.Topmost = true;
+            HidePanel(); // The next tick shows it again below a terminal in front.
+        }
+    }
+
+    private void ShowWidget()
+    {
+        Screens screens = _panel.Screens;
+        Screen? primary = screens.Primary ?? screens.All.FirstOrDefault();
+        if (primary is null)
+        {
+            return;
+        }
+        Screen target = _settings.WidgetX is { } x && _settings.WidgetY is { } y
+            ? screens.ScreenFromPoint(new PixelPoint(x, y)) ?? primary
+            : primary;
+
+        ScreenRect rect = PanelPlacement.Widget(_settings.WidgetX, _settings.WidgetY,
+            screens.All.Select(s => ToRect(s.WorkingArea)).ToList(), ToRect(primary.WorkingArea), target.Scaling);
+
+        _placingWidget = true;
+        _panel.Width = PanelPlacement.WidgetWidthDip;
+        _panel.Height = PanelPlacement.PanelHeightDip;
+        _panel.Position = new PixelPoint(rect.X, rect.Y);
+        _panel.Topmost = _settings.WidgetTopmost;
+        if (!_panel.IsVisible)
+        {
+            Render();
+            _panel.Show();
+        }
+        ApplyNativeStyle();
+        _panel.Position = new PixelPoint(rect.X, rect.Y);
+        _placingWidget = false;
+    }
+
+    private void ShowAttached(ScreenRect rect, double scale)
     {
         bool wasHidden = !_panel.IsVisible;
         if (!wasHidden && _placed == rect)
@@ -123,17 +209,27 @@ public sealed class AppController : IDisposable
             _panel.Show();
         }
 
-        if (OperatingSystem.IsWindows() && _panel.TryGetPlatformHandle()?.Handle is { } hwnd)
+        if (ApplyNativeStyle() is { } hwnd && OperatingSystem.IsWindows())
         {
-            if (!_nativeStyleApplied)
-            {
-                WindowsPanelHost.MakeNonActivating(hwnd);
-                _nativeStyleApplied = true;
-            }
             // Physical pixels avoid rounding drift when the terminal and panel monitors differ in scale.
             WindowsPanelHost.Place(hwnd, rect);
         }
         _placed = rect;
+    }
+
+    /// <summary>Makes the panel non-activating on Windows. Returns its window handle there.</summary>
+    private nint? ApplyNativeStyle()
+    {
+        if (!OperatingSystem.IsWindows() || _panel.TryGetPlatformHandle()?.Handle is not { } hwnd)
+        {
+            return null;
+        }
+        if (!_nativeStyleApplied)
+        {
+            WindowsPanelHost.MakeNonActivating(hwnd);
+            _nativeStyleApplied = true;
+        }
+        return hwnd;
     }
 
     private void HidePanel()
@@ -145,12 +241,118 @@ public sealed class AppController : IDisposable
         _placed = null;
     }
 
-    private void Render() =>
+    private void OnPanelMoved()
+    {
+        if (_settings.DisplayMode == DisplayMode.Widget && !_placingWidget && _panel.IsVisible)
+        {
+            _saveWidgetTimer.Stop();
+            _saveWidgetTimer.Start();
+        }
+    }
+
+    private void SaveWidgetPosition()
+    {
+        _saveWidgetTimer.Stop();
+        _settings.WidgetX = _panel.Position.X;
+        _settings.WidgetY = _panel.Position.Y;
+        _settings.Save();
+    }
+
+    private void Render()
+    {
         _panel.Render(_providers.Select(p => p.Current), _strings, DateTimeOffset.Now);
+        _panel.RenderIme(_settings.ShowIme, _imeLabel, _strings);
+    }
+
+    // ----- ISettingsHost -----
+
+    public AppSettings Settings => _settings;
+
+    public Strings Strings => _strings;
+
+    public bool ClaudeConnected => ClaudeIntegration.IsInstalled();
+
+    public bool StartAtLoginSupported => OperatingSystem.IsWindows();
+
+    public bool StartAtLogin
+    {
+        get => OperatingSystem.IsWindows() && WindowsStartup.IsEnabled();
+        set
+        {
+            if (OperatingSystem.IsWindows())
+            {
+                WindowsStartup.SetEnabled(value);
+            }
+            BuildTray();
+        }
+    }
+
+    public void SetDisplayMode(DisplayMode mode)
+    {
+        _settings.DisplayMode = mode;
+        _settings.Save();
+        ApplyDisplayMode();
+    }
+
+    public void SetWidgetTopmost(bool topmost)
+    {
+        _settings.WidgetTopmost = topmost;
+        _settings.Save();
+        if (_settings.DisplayMode == DisplayMode.Widget)
+        {
+            _panel.Topmost = topmost;
+        }
+    }
+
+    public void SetShowIme(bool show)
+    {
+        _settings.ShowIme = show;
+        _settings.Save();
+        _imeLabel = null;
+        Render();
+    }
+
+    public void SetLanguage(string code)
+    {
+        _settings.Language = code;
+        _settings.Save();
+        _strings = Strings.For(code);
+        BuildTray();
+        Render();
+    }
+
+    public string? SetClaudeConnected(bool connected)
+    {
+        string? error;
+        bool ok = connected ? ClaudeIntegration.Install(_settings, out error) : ClaudeIntegration.Uninstall(_settings, out error);
+        _providers.First(p => p.Id == ProviderId.ClaudeCode).Refresh();
+        BuildTray();
+        return ok ? null : error;
+    }
+
+    // ----- Tray and windows -----
+
+    public void OpenSettings()
+    {
+        if (_settingsWindow is { } open)
+        {
+            open.Activate();
+            return;
+        }
+        _settingsWindow = new SettingsWindow(this) { Icon = LoadIcon("app.png") };
+        _settingsWindow.Closed += (_, _) => _settingsWindow = null;
+        _settingsWindow.Show();
+        _settingsWindow.Activate();
+    }
 
     private void BuildTray()
     {
         var menu = new NativeMenu();
+
+        var settings = new NativeMenuItem(_strings.MenuSettings);
+        settings.Click += (_, _) => OpenSettings();
+        menu.Items.Add(settings);
+        menu.Items.Add(new NativeMenuItemSeparator());
 
         var language = new NativeMenuItem(_strings.MenuLanguage) { Menu = new NativeMenu() };
         foreach (var (code, label) in new[] { ("system", _strings.MenuSystemLanguage), ("en", "English"), ("ko", "한국어") })
@@ -160,33 +362,26 @@ public sealed class AppController : IDisposable
                 ToggleType = NativeMenuItemToggleType.Radio,
                 IsChecked = _settings.Language == code,
             };
-            item.Click += (_, _) => SetLanguage(code);
+            item.Click += (_, _) =>
+            {
+                SetLanguage(code);
+                _settingsWindow?.Build();
+            };
             language.Menu.Items.Add(item);
         }
         menu.Items.Add(language);
 
         bool claudeConnected = ClaudeIntegration.IsInstalled();
         var claude = new NativeMenuItem(claudeConnected ? _strings.MenuDisconnectClaude : _strings.MenuConnectClaude);
-        claude.Click += (_, _) => ToggleClaude(!claudeConnected);
-        menu.Items.Add(claude);
-
-        if (OperatingSystem.IsWindows())
+        claude.Click += (_, _) =>
         {
-            var startup = new NativeMenuItem(_strings.MenuStartAtLogin)
+            if (SetClaudeConnected(!claudeConnected) is { } error && _tray is not null)
             {
-                ToggleType = NativeMenuItemToggleType.CheckBox,
-                IsChecked = WindowsStartup.IsEnabled(),
-            };
-            startup.Click += (_, _) =>
-            {
-                if (OperatingSystem.IsWindows())
-                {
-                    WindowsStartup.SetEnabled(!WindowsStartup.IsEnabled());
-                }
-                BuildTray();
-            };
-            menu.Items.Add(startup);
-        }
+                _tray.ToolTipText = string.Format(_strings.ClaudeConnectFailed, error);
+            }
+            _settingsWindow?.Build();
+        };
+        menu.Items.Add(claude);
 
         var refresh = new NativeMenuItem(_strings.MenuRefresh);
         refresh.Click += (_, _) => _providers.ForEach(p => p.Refresh());
@@ -204,37 +399,22 @@ public sealed class AppController : IDisposable
 
         if (_tray is null)
         {
-            using Stream icon = AssetLoader.Open(new Uri("avares://AIUsageWidget/Assets/tray.png"));
             _tray = new TrayIcon
             {
-                Icon = new WindowIcon(icon),
+                Icon = LoadIcon("tray.png"),
                 ToolTipText = $"{AppInfo.Name} {AppInfo.Version}",
                 IsVisible = true,
             };
+            _tray.Clicked += (_, _) => OpenSettings();
             TrayIcon.SetIcons(_app, [_tray]);
         }
         _tray.Menu = menu;
     }
 
-    private void SetLanguage(string code)
+    private static WindowIcon LoadIcon(string name)
     {
-        _settings.Language = code;
-        _settings.Save();
-        _strings = Strings.For(code);
-        BuildTray();
-        Render();
-    }
-
-    private void ToggleClaude(bool connect)
-    {
-        string? error;
-        bool ok = connect ? ClaudeIntegration.Install(_settings, out error) : ClaudeIntegration.Uninstall(_settings, out error);
-        if (!ok && _tray is not null)
-        {
-            _tray.ToolTipText = string.Format(_strings.ClaudeConnectFailed, error);
-        }
-        _providers.First(p => p.Id == ProviderId.ClaudeCode).Refresh();
-        BuildTray();
+        using Stream stream = AssetLoader.Open(new Uri($"avares://AIUsageWidget/Assets/{name}"));
+        return new WindowIcon(stream);
     }
 
     private static void OpenUrl(string url)
@@ -252,6 +432,10 @@ public sealed class AppController : IDisposable
     {
         _trackTimer.Stop();
         _clockTimer.Stop();
+        if (_saveWidgetTimer.IsEnabled)
+        {
+            SaveWidgetPosition();
+        }
         foreach (IUsageProvider provider in _providers)
         {
             provider.Dispose();

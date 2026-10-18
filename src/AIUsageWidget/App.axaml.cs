@@ -19,6 +19,10 @@ public sealed class App : Application
             _controller = new AppController(this, desktop);
             desktop.Exit += (_, _) => _controller.Dispose();
             _controller.Start();
+            if (desktop.Args?.Contains("--settings") == true)
+            {
+                _controller.OpenSettings();
+            }
         }
         base.OnFrameworkInitializationCompleted();
     }

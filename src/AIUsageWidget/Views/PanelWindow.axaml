@@ -11,7 +11,7 @@
         Background="Transparent"
         TransparencyLevelHint="Transparent"
         Width="640" Height="52">
-  <Border Background="#F2181A1F" BorderBrush="#33FFFFFF" BorderThickness="0,1,0,0" Padding="12,4,12,4">
-    <Grid x:Name="Cells" ColumnDefinitions="*,16,*,16,*" />
+  <Border x:Name="Frame" Background="#F2181A1F" BorderBrush="#33FFFFFF" BorderThickness="0,1,0,0" Padding="12,4,8,4">
+    <Grid x:Name="Cells" ColumnDefinitions="*,16,*,16,*,12,Auto" />
   </Border>
 </Window>

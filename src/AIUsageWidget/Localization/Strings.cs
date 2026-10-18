@@ -34,6 +34,23 @@ public sealed class Strings
         menuOpenProject: "Project page",
         menuQuit: "Quit",
         claudeConnectFailed: "Could not change Claude Code settings: {0}",
+        menuSettings: "Settings…",
+        settingsTitle: "AIUsageWidget Settings",
+        displayMode: "Display mode",
+        modeTerminal: "Attach below the terminal window",
+        modeTerminalHint: "Shown only while a terminal is in front.",
+        modeWidget: "Standalone widget",
+        modeWidgetHint: "Always shown. Drag it to any place on the screen.",
+        widgetTopmost: "Keep the widget above other windows",
+        showIme: "Show keyboard input state (EN / 한) at the right end",
+        claudeSection: "Claude Code",
+        claudeConnected: "Connected through the status line.",
+        claudeDisconnected: "Not connected. Connecting edits ~/.claude/settings.json and keeps your current status line.",
+        connect: "Connect",
+        disconnect: "Disconnect",
+        general: "General",
+        close: "Close",
+        imeTitle: "Input",
         days: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]);
 
     public static Strings Korean { get; } = new(
@@ -64,6 +81,23 @@ public sealed class Strings
         menuOpenProject: "프로젝트 페이지",
         menuQuit: "종료",
         claudeConnectFailed: "Claude Code 설정을 바꾸지 못했습니다: {0}",
+        menuSettings: "설정…",
+        settingsTitle: "AIUsageWidget 설정",
+        displayMode: "표시 방식",
+        modeTerminal: "터미널 창 아래에 붙이기",
+        modeTerminalHint: "터미널이 앞에 있을 때만 표시합니다.",
+        modeWidget: "독립 위젯",
+        modeWidgetHint: "항상 표시합니다. 화면 어디로든 끌어서 옮길 수 있습니다.",
+        widgetTopmost: "위젯을 다른 창보다 항상 위에 표시",
+        showIme: "맨 오른쪽에 키보드 입력 상태(EN / 한) 표시",
+        claudeSection: "Claude Code",
+        claudeConnected: "상태 표시줄을 통해 연결되어 있습니다.",
+        claudeDisconnected: "연결되어 있지 않습니다. 연결하면 ~/.claude/settings.json을 고치며, 지금 쓰는 상태 표시줄은 그대로 유지됩니다.",
+        connect: "연결",
+        disconnect: "연결 해제",
+        general: "일반",
+        close: "닫기",
+        imeTitle: "입력",
         days: ["일", "월", "화", "수", "목", "금", "토"]);
 
     private Strings(string code, string fiveHour, string weekly, string left, string resets, string resetsIn,
@@ -71,7 +105,7 @@ public sealed class Strings
         string notConnected, string waiting, string waitingClaude, string unsupported, string error, string starting,
         string menuLanguage, string menuSystemLanguage, string menuConnectClaude, string menuDisconnectClaude,
         string menuStartAtLogin, string menuRefresh, string menuOpenProject, string menuQuit,
-        string claudeConnectFailed, string[] days)
+        string claudeConnectFailed, string menuSettings, string settingsTitle, string displayMode, string modeTerminal, string modeTerminalHint, string modeWidget, string modeWidgetHint, string widgetTopmost, string showIme, string claudeSection, string claudeConnected, string claudeDisconnected, string connect, string disconnect, string general, string close, string imeTitle, string[] days)
     {
         Code = code;
         FiveHour = fiveHour;
@@ -100,6 +134,23 @@ public sealed class Strings
         MenuOpenProject = menuOpenProject;
         MenuQuit = menuQuit;
         ClaudeConnectFailed = claudeConnectFailed;
+        MenuSettings = menuSettings;
+        SettingsTitle = settingsTitle;
+        DisplayMode = displayMode;
+        ModeTerminal = modeTerminal;
+        ModeTerminalHint = modeTerminalHint;
+        ModeWidget = modeWidget;
+        ModeWidgetHint = modeWidgetHint;
+        WidgetTopmost = widgetTopmost;
+        ShowIme = showIme;
+        ClaudeSection = claudeSection;
+        ClaudeConnected = claudeConnected;
+        ClaudeDisconnected = claudeDisconnected;
+        Connect = connect;
+        Disconnect = disconnect;
+        General = general;
+        Close = close;
+        ImeTitle = imeTitle;
         Days = days;
     }
 
@@ -130,6 +181,23 @@ public sealed class Strings
     public string MenuOpenProject { get; }
     public string MenuQuit { get; }
     public string ClaudeConnectFailed { get; }
+    public string MenuSettings { get; }
+    public string SettingsTitle { get; }
+    public string DisplayMode { get; }
+    public string ModeTerminal { get; }
+    public string ModeTerminalHint { get; }
+    public string ModeWidget { get; }
+    public string ModeWidgetHint { get; }
+    public string WidgetTopmost { get; }
+    public string ShowIme { get; }
+    public string ClaudeSection { get; }
+    public string ClaudeConnected { get; }
+    public string ClaudeDisconnected { get; }
+    public string Connect { get; }
+    public string Disconnect { get; }
+    public string General { get; }
+    public string Close { get; }
+    public string ImeTitle { get; }
     public string[] Days { get; }
 
     /// <summary>Resolves a setting value ("system", "en", "ko") to a string table.</summary>
