@@ -4,6 +4,10 @@
 
 터미널 아래 또는 독립 데스크톱 위젯에서 Codex, Claude Code, Antigravity의 사용량 한도를 확인합니다. Windows와 macOS, 영어와 한국어를 지원합니다.
 
+![Windows Terminal 아래에 사용량 한도를 표시하는 AIUsageWidget](screenshot/2026-10-18_18-25-26.png)
+
+*Windows Terminal 아래에 붙인 사용량 보조창입니다.*
+
 ## 다운로드 및 설치
 
 [**0.0.9 다운로드**](https://github.com/chojema/AIUsageWidget/releases/tag/v0.0.9)

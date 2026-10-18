@@ -4,6 +4,10 @@ English | [한국어](README.ko.md)
 
 See your Codex, Claude Code and Antigravity usage limits below your terminal or in a standalone desktop widget. Available for Windows and macOS, in English and Korean.
 
+![AIUsageWidget showing usage limits below Windows Terminal](screenshot/2026-10-18_18-25-26.png)
+
+*Usage panel attached below Windows Terminal.*
+
 ## Download and install
 
 [**Download 0.0.9**](https://github.com/chojema/AIUsageWidget/releases/tag/v0.0.9)
