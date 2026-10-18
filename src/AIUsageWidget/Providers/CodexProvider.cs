@@ -13,13 +13,13 @@ namespace AIUsageWidget.Providers;
 /// </summary>
 public sealed class CodexProvider : IUsageProvider
 {
-    private static readonly TimeSpan PollInterval = TimeSpan.FromSeconds(60);
     private static readonly TimeSpan RestartDelay = TimeSpan.FromSeconds(30);
     private static readonly TimeSpan MissingCliRetry = TimeSpan.FromMinutes(5);
 
     private readonly CancellationTokenSource _stop = new();
     private readonly ConcurrentDictionary<long, TaskCompletionSource<JsonObject>> _pending = new();
     private readonly SemaphoreSlim _refresh = new(0);
+    private readonly IntervalSetting _interval = new(TimeSpan.FromMinutes(5));
     private Process? _process;
     private long _nextId;
     private (UsageWindow? FiveHour, UsageWindow? Weekly) _windows;
@@ -30,7 +30,22 @@ public sealed class CodexProvider : IUsageProvider
 
     public event Action<ProviderSnapshot>? Changed;
 
-    public void Start() => _ = Task.Run(RunAsync);
+    private bool _started;
+
+    public void Start()
+    {
+        _started = true;
+        _ = Task.Run(RunAsync);
+    }
+
+    public void SetInterval(TimeSpan? interval)
+    {
+        _interval.Set(interval);
+        if (_started)
+        {
+            Refresh(); // Re-evaluate the current wait with the new interval.
+        }
+    }
 
     public void Refresh()
     {
@@ -103,7 +118,8 @@ public sealed class CodexProvider : IUsageProvider
             JsonObject response = await RequestAsync("account/rateLimits/read",
                 new JsonObject { ["excludeResetCreditDetails"] = true }, token);
             HandleReadResponse(response);
-            await DelayOrRefresh(PollInterval, token);
+            // Rate-limit notifications keep arriving while waiting, even in manual mode.
+            await DelayOrRefresh(_interval.Delay, token);
             if (reader.IsCompleted)
             {
                 break;

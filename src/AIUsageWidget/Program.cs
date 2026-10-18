@@ -17,7 +17,7 @@ internal static class Program
         Mutex? single = null;
         try
         {
-            single = new Mutex(initiallyOwned: true, "AIUsageWidget.SingleInstance", out bool created);
+            single = new Mutex(initiallyOwned: true, SingleInstanceName(), out bool created);
             if (!created)
             {
                 return 0; // Already running.
@@ -37,6 +37,19 @@ internal static class Program
             single?.Dispose();
         }
         return 0;
+    }
+
+    /// <summary>One instance per data folder, so a portable copy with its own data folder can run alongside.</summary>
+    private static string SingleInstanceName()
+    {
+        const string name = "AIUsageWidget.SingleInstance";
+        if (Environment.GetEnvironmentVariable("AIUSAGEWIDGET_DATA_DIR") is not { Length: > 0 } custom)
+        {
+            return name;
+        }
+        byte[] hash = System.Security.Cryptography.SHA256.HashData(
+            System.Text.Encoding.UTF8.GetBytes(Path.GetFullPath(custom).ToUpperInvariant()));
+        return $"{name}.{Convert.ToHexString(hash, 0, 8)}";
     }
 
     public static AppBuilder BuildAvaloniaApp() =>

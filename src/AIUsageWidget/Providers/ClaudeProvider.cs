@@ -13,6 +13,7 @@ public sealed class ClaudeProvider : IUsageProvider
 
     private readonly Timer _timer;
     private bool _claudePresent;
+    private bool _manual;
     private int _busy;
 
     public ClaudeProvider()
@@ -32,9 +33,23 @@ public sealed class ClaudeProvider : IUsageProvider
         {
             _claudePresent = DetectClaude();
             ClaudeIntegration.RepointIfMoved();
-            _timer.Change(TimeSpan.Zero, PollInterval);
+            Poll();
+            ApplyTimer();
         });
     }
+
+    /// <summary>
+    /// Claude Code pushes its limits into a local file, so any automatic interval reads that file
+    /// every few seconds; only manual mode waits for <see cref="Refresh"/>.
+    /// </summary>
+    public void SetInterval(TimeSpan? interval)
+    {
+        _manual = interval is null;
+        ApplyTimer();
+    }
+
+    private void ApplyTimer() =>
+        _timer.Change(_manual ? Timeout.InfiniteTimeSpan : PollInterval, _manual ? Timeout.InfiniteTimeSpan : PollInterval);
 
     public void Refresh()
     {

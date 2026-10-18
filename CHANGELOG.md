@@ -6,6 +6,10 @@
 - Antigravity model group selection in Settings; the panel title shows the group in use.
 - Safety check: the Antigravity answer is accepted only when no agent turn ran; otherwise collection stops for the session.
 - Arguments for CLIs started through the macOS login shell are quoted.
+- Refresh interval in Settings: manual, 1, 5 (default), 30 or 60 minutes, or a custom number of minutes.
+- Panel buttons: ↻ refreshes now; ✕ hides the panel or quits, asking inside the panel by default or using the action chosen in Settings.
+- Tray menu item to show a hidden panel again.
+- A copy started with its own data folder (AIUSAGEWIDGET_DATA_DIR) runs as a separate instance.
 
 ## 0.0.2 — 2026-10-18
 

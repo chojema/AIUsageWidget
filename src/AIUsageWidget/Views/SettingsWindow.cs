@@ -19,6 +19,8 @@ public interface ISettingsHost
     void SetWidgetTopmost(bool topmost);
     void SetShowIme(bool show);
     void SetLanguage(string code);
+    void SetRefresh(RefreshPreset preset, int customMinutes);
+    void SetCloseAction(CloseAction action);
     /// <summary>Antigravity model groups from the last successful read.</summary>
     IReadOnlyList<string> AntigravityGroups { get; }
     /// <summary>The group shown in the panel after any fallback.</summary>
@@ -96,8 +98,85 @@ public sealed class SettingsWindow : Window
         root.Children.Add(Hint(s.ModeWidgetHint));
         root.Children.Add(topmost);
 
+        // Refresh
+        root.Children.Add(Heading(s.RefreshSection));
+        RefreshPreset[] presets =
+        [
+            RefreshPreset.Manual, RefreshPreset.OneMinute, RefreshPreset.FiveMinutes,
+            RefreshPreset.ThirtyMinutes, RefreshPreset.OneHour, RefreshPreset.Custom,
+        ];
+        var interval = new ComboBox
+        {
+            ItemsSource = new[]
+            {
+                s.RefreshManual, s.RefreshOneMinute, s.RefreshFiveMinutes,
+                s.RefreshThirtyMinutes, s.RefreshOneHour, s.RefreshCustom,
+            },
+            SelectedIndex = Math.Max(0, Array.IndexOf(presets, settings.RefreshPreset)),
+            MinWidth = 180,
+        };
+        var minutes = new NumericUpDown
+        {
+            Minimum = RefreshInterval.MinCustomMinutes,
+            Maximum = RefreshInterval.MaxCustomMinutes,
+            Increment = 1,
+            FormatString = "0",
+            Value = RefreshInterval.ClampCustom(settings.CustomRefreshMinutes),
+            Width = 130,
+            IsVisible = settings.RefreshPreset == RefreshPreset.Custom,
+        };
+        var minutesUnit = new TextBlock
+        {
+            Text = s.MinutesUnit,
+            VerticalAlignment = VerticalAlignment.Center,
+            IsVisible = minutes.IsVisible,
+        };
+        var refreshHint = Hint(settings.RefreshPreset == RefreshPreset.Manual ? s.RefreshManualHint : s.RefreshHint);
+        refreshHint.Margin = new Thickness(0, 2, 0, 0);
+
+        void ApplyRefresh()
+        {
+            if (_building || interval.SelectedIndex < 0)
+            {
+                return;
+            }
+            RefreshPreset preset = presets[interval.SelectedIndex];
+            int custom = RefreshInterval.ClampCustom((int)(minutes.Value ?? settings.CustomRefreshMinutes));
+            minutes.IsVisible = minutesUnit.IsVisible = preset == RefreshPreset.Custom;
+            refreshHint.Text = preset == RefreshPreset.Manual ? _host.Strings.RefreshManualHint : _host.Strings.RefreshHint;
+            _host.SetRefresh(preset, custom);
+        }
+        interval.SelectionChanged += (_, _) => ApplyRefresh();
+        minutes.ValueChanged += (_, _) => ApplyRefresh();
+
+        var intervalRow = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 10 };
+        intervalRow.Children.Add(new TextBlock { Text = s.RefreshInterval, VerticalAlignment = VerticalAlignment.Center });
+        intervalRow.Children.Add(interval);
+        intervalRow.Children.Add(minutes);
+        intervalRow.Children.Add(minutesUnit);
+        root.Children.Add(intervalRow);
+        root.Children.Add(refreshHint);
+
         // General
         root.Children.Add(Heading(s.General));
+        CloseAction[] closeActions = [CloseAction.Ask, CloseAction.HidePanel, CloseAction.Quit];
+        var closeAction = new ComboBox
+        {
+            ItemsSource = new[] { s.CloseAsk, s.CloseHide, s.CloseQuit },
+            SelectedIndex = Math.Max(0, Array.IndexOf(closeActions, settings.CloseAction)),
+            MinWidth = 180,
+        };
+        closeAction.SelectionChanged += (_, _) =>
+        {
+            if (!_building && closeAction.SelectedIndex >= 0)
+            {
+                _host.SetCloseAction(closeActions[closeAction.SelectedIndex]);
+            }
+        };
+        var closeRow = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 12, Margin = new Thickness(0, 0, 0, 4) };
+        closeRow.Children.Add(new TextBlock { Text = s.CloseButtonAction, VerticalAlignment = VerticalAlignment.Center });
+        closeRow.Children.Add(closeAction);
+        root.Children.Add(closeRow);
         var showIme = new CheckBox { Content = s.ShowIme, IsChecked = settings.ShowIme };
         showIme.IsCheckedChanged += (_, _) =>
         {

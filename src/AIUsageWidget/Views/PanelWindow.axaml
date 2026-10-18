@@ -11,7 +11,40 @@
         Background="Transparent"
         TransparencyLevelHint="Transparent"
         Width="640" Height="52">
-  <Border x:Name="Frame" Background="#F2181A1F" BorderBrush="#33FFFFFF" BorderThickness="0,1,0,0" Padding="12,4,8,4">
-    <Grid x:Name="Cells" ColumnDefinitions="*,16,*,16,*,12,Auto" />
+  <Window.Styles>
+    <Style Selector="Button.panel">
+      <Setter Property="Width" Value="20" />
+      <Setter Property="Height" Value="20" />
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="FontSize" Value="11" />
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="Foreground" Value="#A8AEB8" />
+      <Setter Property="HorizontalContentAlignment" Value="Center" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
+      <Setter Property="Cursor" Value="Hand" />
+    </Style>
+    <Style Selector="Button.prompt">
+      <Setter Property="FontSize" Value="11" />
+      <Setter Property="Padding" Value="10,2" />
+      <Setter Property="MinHeight" Value="24" />
+    </Style>
+  </Window.Styles>
+  <Border x:Name="Frame" Background="#F2181A1F" BorderBrush="#33FFFFFF" BorderThickness="0,1,0,0" Padding="12,4,6,4">
+    <Panel>
+      <Grid x:Name="Cells" ColumnDefinitions="*,16,*,16,*,12,Auto,6,Auto">
+        <StackPanel x:Name="Buttons" Grid.Column="8" VerticalAlignment="Center" Spacing="2">
+          <Button x:Name="CloseButton" Classes="panel" Content="✕" />
+          <Button x:Name="RefreshButton" Classes="panel" Content="↻" FontSize="13" />
+        </StackPanel>
+      </Grid>
+      <Border x:Name="ClosePrompt" IsVisible="False" Background="#FF181A1F">
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Spacing="8">
+          <TextBlock x:Name="ClosePromptText" VerticalAlignment="Center" FontSize="12" Foreground="#E6E8EC" Margin="0,0,4,0" />
+          <Button x:Name="HideButton" Classes="prompt" />
+          <Button x:Name="QuitButton" Classes="prompt" />
+          <Button x:Name="CancelButton" Classes="prompt" />
+        </StackPanel>
+      </Border>
+    </Panel>
   </Border>
 </Window>

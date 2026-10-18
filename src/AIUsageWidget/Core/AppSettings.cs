@@ -13,6 +13,26 @@ public enum DisplayMode
     Widget,
 }
 
+[JsonConverter(typeof(JsonStringEnumConverter<RefreshPreset>))]
+public enum RefreshPreset
+{
+    Manual,
+    OneMinute,
+    FiveMinutes,
+    ThirtyMinutes,
+    OneHour,
+    Custom,
+}
+
+[JsonConverter(typeof(JsonStringEnumConverter<CloseAction>))]
+public enum CloseAction
+{
+    /// <summary>Ask each time whether to hide the panel or quit.</summary>
+    Ask,
+    HidePanel,
+    Quit,
+}
+
 public sealed class AppSettings
 {
     /// <summary>"system", "en" or "ko".</summary>
@@ -31,6 +51,15 @@ public sealed class AppSettings
 
     /// <summary>Shows the keyboard input state (for example EN or 한) at the right end of the panel.</summary>
     public bool ShowIme { get; set; } = true;
+
+    /// <summary>How often Codex and Antigravity are queried.</summary>
+    public RefreshPreset RefreshPreset { get; set; } = RefreshPreset.FiveMinutes;
+
+    /// <summary>Minutes between queries when <see cref="RefreshPreset"/> is Custom.</summary>
+    public int CustomRefreshMinutes { get; set; } = 10;
+
+    /// <summary>What the close button on the panel does.</summary>
+    public CloseAction CloseAction { get; set; } = CloseAction.Ask;
 
     /// <summary>The Antigravity model group shown in the panel; null uses the default group.</summary>
     public string? AntigravityGroup { get; set; }

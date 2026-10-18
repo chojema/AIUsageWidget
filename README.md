@@ -27,6 +27,20 @@ Choose the mode in **Settings** (tray menu → Settings…, or click the tray ic
 | **Attach below the terminal window** (default) | Shown only while a terminal is in front, as described below. |
 | **Standalone widget** | Always shown. Drag it anywhere; the position is remembered. Optionally kept above other windows. |
 
+## Refresh interval
+
+Choose how often Codex and Antigravity are queried in **Settings → Refresh**: Manual, every minute, every 5 minutes (default), every 30 minutes, every hour, or a custom number of minutes (1 to 1440).
+
+- **Manual** queries only at startup and when you click **↻** on the panel or **Refresh now** in the tray menu.
+- Claude Code values are not queried; they appear as soon as Claude Code reports them (except in manual mode, where ↻ reads them).
+
+## Panel buttons
+
+The right end of the panel has two small buttons:
+
+- **↻** refreshes all values now.
+- **✕** closes the panel. By default it asks, inside the panel, whether to **Hide panel** or **Quit program**. Choose a fixed action in **Settings → Close button**. A hidden panel comes back with **Show panel** in the tray menu, or when you change the display mode.
+
 ## Keyboard input indicator
 
 The right end of the panel shows the keyboard input state of the window in front: **EN** or **한** (Korean), and the language code for other input methods (for example JA or ZH). It can be turned off in Settings.
@@ -63,7 +77,7 @@ Antigravity reports separate 5-hour and weekly limits for each model group (for 
 - Until you choose, *Gemini Models* is shown (or the first group if that one does not exist).
 - If the chosen group disappears, for example after a plan change, the panel falls back the same way.
 
-The command runs every 2 minutes without a shell, and its answer is accepted only when it shows that no agent turn ran. If the CLI ever answers differently, collection stops for the session so that no quota can be spent in the background.
+The command runs at the refresh interval without a shell, and its answer is accepted only when it shows that no agent turn ran. If the CLI ever answers differently, collection stops for the session so that no quota can be spent in the background.
 
 ### Claude Code connection
 
@@ -87,7 +101,8 @@ The executable is not code-signed yet, so Windows SmartScreen may show a warning
 
 ## Tray menu
 
-- **Settings…** (also opens with a click on the tray icon): display mode, widget on top, input indicator, start at login, language, Claude Code connection
+- **Show panel** (only while the panel is hidden)
+- **Settings…** (also opens with a click on the tray icon): display mode, widget on top, refresh interval, close button action, input indicator, start at login, language, Antigravity model group, Claude Code connection
 - **Language**: System default, English, or 한국어 (Korean)
 - **Connect / Disconnect Claude Code**
 - **Start at login** (Windows)

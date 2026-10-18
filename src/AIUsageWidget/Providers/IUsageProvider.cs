@@ -15,4 +15,7 @@ public interface IUsageProvider : IDisposable
 
     /// <summary>Asks for fresh data as soon as possible.</summary>
     void Refresh();
+
+    /// <summary>Time between automatic queries; null means only <see cref="Refresh"/> queries.</summary>
+    void SetInterval(TimeSpan? interval);
 }

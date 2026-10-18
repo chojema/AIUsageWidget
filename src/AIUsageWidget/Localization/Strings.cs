@@ -56,6 +56,27 @@ public sealed class Strings
         antigravityGroup: "Model group",
         antigravityGroupHint: "Each group has its own 5-hour and weekly limits. The list comes from the CLI.",
         antigravityGroupsPending: "Groups appear after the first successful read.",
+        refreshSection: "Refresh",
+        refreshInterval: "Update interval",
+        refreshManual: "Manual",
+        refreshOneMinute: "Every minute",
+        refreshFiveMinutes: "Every 5 minutes",
+        refreshThirtyMinutes: "Every 30 minutes",
+        refreshOneHour: "Every hour",
+        refreshCustom: "Custom",
+        minutesUnit: "minutes",
+        refreshHint: "Codex and Antigravity are queried at this interval. Claude Code values appear as soon as Claude Code reports them.",
+        refreshManualHint: "Update with the ↻ button on the panel or Refresh now in the tray menu.",
+        closeButtonAction: "Close button (✕) on the panel",
+        closeAsk: "Ask each time",
+        closeHide: "Hide the panel",
+        closeQuit: "Quit the program",
+        closePrompt: "Close the panel or quit?",
+        closeHideButton: "Hide panel",
+        closeQuitButton: "Quit program",
+        cancel: "Cancel",
+        menuShowPanel: "Show panel",
+        closeTooltip: "Close",
         days: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]);
 
     public static Strings Korean { get; } = new(
@@ -108,6 +129,27 @@ public sealed class Strings
         antigravityGroup: "모델 그룹",
         antigravityGroupHint: "그룹마다 5시간 한도와 주간 한도가 따로 있습니다. 목록은 CLI에서 받아 옵니다.",
         antigravityGroupsPending: "처음 한도를 읽은 뒤에 그룹 목록이 나타납니다.",
+        refreshSection: "갱신",
+        refreshInterval: "갱신 주기",
+        refreshManual: "수동",
+        refreshOneMinute: "1분마다",
+        refreshFiveMinutes: "5분마다",
+        refreshThirtyMinutes: "30분마다",
+        refreshOneHour: "1시간마다",
+        refreshCustom: "사용자 설정",
+        minutesUnit: "분",
+        refreshHint: "Codex와 Antigravity는 이 주기로 조회합니다. Claude Code 값은 Claude Code가 알려 주는 즉시 반영합니다.",
+        refreshManualHint: "보조창의 ↻ 버튼이나 트레이 메뉴의 \"지금 새로 고침\"으로 갱신합니다.",
+        closeButtonAction: "보조창의 닫기 버튼(✕)",
+        closeAsk: "매번 묻기",
+        closeHide: "보조창만 닫기",
+        closeQuit: "프로그램 종료",
+        closePrompt: "창만 닫을까요, 프로그램을 종료할까요?",
+        closeHideButton: "창만 닫기",
+        closeQuitButton: "프로그램 종료",
+        cancel: "취소",
+        menuShowPanel: "보조창 다시 표시",
+        closeTooltip: "닫기",
         days: ["일", "월", "화", "수", "목", "금", "토"]);
 
     private Strings(string code, string fiveHour, string weekly, string left, string resets, string resetsIn,
@@ -115,7 +157,7 @@ public sealed class Strings
         string notConnected, string waiting, string waitingClaude, string unsupported, string error, string starting,
         string menuLanguage, string menuSystemLanguage, string menuConnectClaude, string menuDisconnectClaude,
         string menuStartAtLogin, string menuRefresh, string menuOpenProject, string menuQuit,
-        string claudeConnectFailed, string menuSettings, string settingsTitle, string displayMode, string modeTerminal, string modeTerminalHint, string modeWidget, string modeWidgetHint, string widgetTopmost, string showIme, string claudeSection, string claudeConnected, string claudeDisconnected, string connect, string disconnect, string general, string close, string imeTitle, string antigravityHalted, string antigravitySection, string antigravityGroup, string antigravityGroupHint, string antigravityGroupsPending, string[] days)
+        string claudeConnectFailed, string menuSettings, string settingsTitle, string displayMode, string modeTerminal, string modeTerminalHint, string modeWidget, string modeWidgetHint, string widgetTopmost, string showIme, string claudeSection, string claudeConnected, string claudeDisconnected, string connect, string disconnect, string general, string close, string imeTitle, string antigravityHalted, string antigravitySection, string antigravityGroup, string antigravityGroupHint, string antigravityGroupsPending, string refreshSection, string refreshInterval, string refreshManual, string refreshOneMinute, string refreshFiveMinutes, string refreshThirtyMinutes, string refreshOneHour, string refreshCustom, string minutesUnit, string refreshHint, string refreshManualHint, string closeButtonAction, string closeAsk, string closeHide, string closeQuit, string closePrompt, string closeHideButton, string closeQuitButton, string cancel, string menuShowPanel, string closeTooltip, string[] days)
     {
         Code = code;
         FiveHour = fiveHour;
@@ -166,6 +208,27 @@ public sealed class Strings
         AntigravityGroup = antigravityGroup;
         AntigravityGroupHint = antigravityGroupHint;
         AntigravityGroupsPending = antigravityGroupsPending;
+        RefreshSection = refreshSection;
+        RefreshInterval = refreshInterval;
+        RefreshManual = refreshManual;
+        RefreshOneMinute = refreshOneMinute;
+        RefreshFiveMinutes = refreshFiveMinutes;
+        RefreshThirtyMinutes = refreshThirtyMinutes;
+        RefreshOneHour = refreshOneHour;
+        RefreshCustom = refreshCustom;
+        MinutesUnit = minutesUnit;
+        RefreshHint = refreshHint;
+        RefreshManualHint = refreshManualHint;
+        CloseButtonAction = closeButtonAction;
+        CloseAsk = closeAsk;
+        CloseHide = closeHide;
+        CloseQuit = closeQuit;
+        ClosePrompt = closePrompt;
+        CloseHideButton = closeHideButton;
+        CloseQuitButton = closeQuitButton;
+        Cancel = cancel;
+        MenuShowPanel = menuShowPanel;
+        CloseTooltip = closeTooltip;
         Days = days;
     }
 
@@ -218,6 +281,27 @@ public sealed class Strings
     public string AntigravityGroup { get; }
     public string AntigravityGroupHint { get; }
     public string AntigravityGroupsPending { get; }
+    public string RefreshSection { get; }
+    public string RefreshInterval { get; }
+    public string RefreshManual { get; }
+    public string RefreshOneMinute { get; }
+    public string RefreshFiveMinutes { get; }
+    public string RefreshThirtyMinutes { get; }
+    public string RefreshOneHour { get; }
+    public string RefreshCustom { get; }
+    public string MinutesUnit { get; }
+    public string RefreshHint { get; }
+    public string RefreshManualHint { get; }
+    public string CloseButtonAction { get; }
+    public string CloseAsk { get; }
+    public string CloseHide { get; }
+    public string CloseQuit { get; }
+    public string ClosePrompt { get; }
+    public string CloseHideButton { get; }
+    public string CloseQuitButton { get; }
+    public string Cancel { get; }
+    public string MenuShowPanel { get; }
+    public string CloseTooltip { get; }
     public string[] Days { get; }
 
     /// <summary>Resolves a setting value ("system", "en", "ko") to a string table.</summary>

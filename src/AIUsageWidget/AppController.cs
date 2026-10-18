@@ -38,6 +38,7 @@ public sealed class AppController : IDisposable, ISettingsHost
     private bool _nativeStyleApplied;
     private bool _placingWidget;
     private string _knownGroups = string.Empty;
+    private bool _hiddenByUser;
 
     public AppController(Application app, IClassicDesktopStyleApplicationLifetime desktop)
     {
@@ -51,11 +52,16 @@ public sealed class AppController : IDisposable, ISettingsHost
         _clockTimer = new DispatcherTimer(TimeSpan.FromSeconds(30), DispatcherPriority.Background, (_, _) => Render());
         _saveWidgetTimer = new DispatcherTimer(TimeSpan.FromMilliseconds(600), DispatcherPriority.Background, (_, _) => SaveWidgetPosition());
         _panel.PositionChanged += (_, _) => OnPanelMoved();
+        _panel.RefreshClicked += RefreshAll;
+        _panel.CloseClicked += OnCloseClicked;
+        _panel.HidePanelChosen += HideByUser;
+        _panel.QuitChosen += () => _desktop.Shutdown();
     }
 
     public void Start()
     {
         (_tracker, _imeReader) = CreatePlatformServices();
+        ApplyRefreshInterval();
         foreach (IUsageProvider provider in _providers)
         {
             provider.Changed += _ => Dispatcher.UIThread.Post(OnProviderChanged);
@@ -108,9 +114,9 @@ public sealed class AppController : IDisposable, ISettingsHost
             UpdateIme();
         }
 
-        if (_settings.DisplayMode == DisplayMode.Widget)
+        if (_hiddenByUser || _settings.DisplayMode == DisplayMode.Widget)
         {
-            return; // The widget stays where the user put it.
+            return; // Hidden on request, or a widget that stays where the user put it.
         }
 
         switch (info.Kind)
@@ -154,6 +160,11 @@ public sealed class AppController : IDisposable, ISettingsHost
     private void ApplyDisplayMode()
     {
         _placed = null;
+        if (_hiddenByUser)
+        {
+            HidePanel();
+            return;
+        }
         _panel.Draggable = _settings.DisplayMode == DisplayMode.Widget;
         if (_settings.DisplayMode == DisplayMode.Widget)
         {
@@ -280,6 +291,45 @@ public sealed class AppController : IDisposable, ISettingsHost
         _panel.RenderIme(_settings.ShowIme, _imeLabel, _strings);
     }
 
+    private void RefreshAll() => _providers.ForEach(p => p.Refresh());
+
+    private void ApplyRefreshInterval()
+    {
+        TimeSpan? interval = RefreshInterval.For(_settings.RefreshPreset, _settings.CustomRefreshMinutes);
+        _providers.ForEach(p => p.SetInterval(interval));
+    }
+
+    private void OnCloseClicked()
+    {
+        switch (_settings.CloseAction)
+        {
+            case CloseAction.HidePanel:
+                HideByUser();
+                break;
+            case CloseAction.Quit:
+                _desktop.Shutdown();
+                break;
+            default:
+                _panel.ShowClosePrompt();
+                break;
+        }
+    }
+
+    /// <summary>Hides the panel until it is shown again from the tray menu or the settings.</summary>
+    private void HideByUser()
+    {
+        _hiddenByUser = true;
+        HidePanel();
+        BuildTray();
+    }
+
+    private void ShowAgain()
+    {
+        _hiddenByUser = false;
+        BuildTray();
+        ApplyDisplayMode();
+    }
+
     // ----- ISettingsHost -----
 
     public AppSettings Settings => _settings;
@@ -307,7 +357,23 @@ public sealed class AppController : IDisposable, ISettingsHost
     {
         _settings.DisplayMode = mode;
         _settings.Save();
+        _hiddenByUser = false; // Choosing a mode shows the panel again.
+        BuildTray();
         ApplyDisplayMode();
+    }
+
+    public void SetRefresh(RefreshPreset preset, int customMinutes)
+    {
+        _settings.RefreshPreset = preset;
+        _settings.CustomRefreshMinutes = RefreshInterval.ClampCustom(customMinutes);
+        _settings.Save();
+        ApplyRefreshInterval();
+    }
+
+    public void SetCloseAction(CloseAction action)
+    {
+        _settings.CloseAction = action;
+        _settings.Save();
     }
 
     public void SetWidgetTopmost(bool topmost)
@@ -376,6 +442,13 @@ public sealed class AppController : IDisposable, ISettingsHost
     {
         var menu = new NativeMenu();
 
+        if (_hiddenByUser)
+        {
+            var show = new NativeMenuItem(_strings.MenuShowPanel);
+            show.Click += (_, _) => ShowAgain();
+            menu.Items.Add(show);
+        }
+
         var settings = new NativeMenuItem(_strings.MenuSettings);
         settings.Click += (_, _) => OpenSettings();
         menu.Items.Add(settings);
@@ -411,7 +484,7 @@ public sealed class AppController : IDisposable, ISettingsHost
         menu.Items.Add(claude);
 
         var refresh = new NativeMenuItem(_strings.MenuRefresh);
-        refresh.Click += (_, _) => _providers.ForEach(p => p.Refresh());
+        refresh.Click += (_, _) => RefreshAll();
         menu.Items.Add(refresh);
 
         menu.Items.Add(new NativeMenuItemSeparator());

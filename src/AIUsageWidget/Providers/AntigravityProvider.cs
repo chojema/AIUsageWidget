@@ -12,13 +12,13 @@ namespace AIUsageWidget.Providers;
 /// </summary>
 public sealed class AntigravityProvider : IUsageProvider
 {
-    private static readonly TimeSpan PollInterval = TimeSpan.FromMinutes(2);
     private static readonly TimeSpan SignedOutRetry = TimeSpan.FromMinutes(30);
     private static readonly TimeSpan MissingCliRetry = TimeSpan.FromMinutes(10);
     private static readonly TimeSpan RunTimeout = TimeSpan.FromSeconds(60);
 
     private readonly CancellationTokenSource _stop = new();
     private readonly SemaphoreSlim _refresh = new(0);
+    private readonly IntervalSetting _interval = new(TimeSpan.FromMinutes(5));
     private readonly object _gate = new();
     private IReadOnlyList<AntigravityGroup> _groups = [];
     private DateTimeOffset? _updatedAt;
@@ -60,7 +60,22 @@ public sealed class AntigravityProvider : IUsageProvider
         }
     }
 
-    public void Start() => _ = Task.Run(RunAsync);
+    private bool _started;
+
+    public void Start()
+    {
+        _started = true;
+        _ = Task.Run(RunAsync);
+    }
+
+    public void SetInterval(TimeSpan? interval)
+    {
+        _interval.Set(interval);
+        if (_started)
+        {
+            Refresh(); // Re-evaluate the current wait with the new interval.
+        }
+    }
 
     public void Refresh()
     {
@@ -95,7 +110,7 @@ public sealed class AntigravityProvider : IUsageProvider
                 continue;
             }
 
-            TimeSpan next = PollInterval;
+            TimeSpan next = _interval.Delay;
             try
             {
                 (string stdout, string stderr, int exitCode) = await RunAsync(start, token);
@@ -130,21 +145,21 @@ public sealed class AntigravityProvider : IUsageProvider
                     _updatedAt = DateTimeOffset.Now;
                 }
                 PublishGroups();
-                return PollInterval;
+                return _interval.Delay;
 
             case AntigravityParseStatus.Unsafe:
                 // The CLI did not answer as the read-only command. Stop for this session so that a
                 // changed CLI can never keep spending quota in the background.
                 _halted = true;
                 Publish(ProviderSnapshot.Of(Id, ProviderState.Error, "unexpected-output"));
-                return PollInterval;
+                return _interval.Delay;
 
             default:
                 bool signedOut = (stderr + stdout).Contains("not logged in", StringComparison.OrdinalIgnoreCase)
                                  || (stderr + stdout).Contains("not authenticated", StringComparison.OrdinalIgnoreCase);
                 Publish(ProviderSnapshot.Of(Id, signedOut ? ProviderState.NotSignedIn : ProviderState.Error,
                     exitCode != 0 ? $"exit {exitCode}" : status.ToString()));
-                return signedOut ? SignedOutRetry : PollInterval;
+                return signedOut && !_interval.IsManual ? SignedOutRetry : _interval.Delay;
         }
     }
 
