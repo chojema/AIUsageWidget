@@ -45,14 +45,14 @@ cat > "$APP/Contents/Info.plist" <<EOF
   <key>CFBundlePackageType</key><string>APPL</string>
   <key>CFBundleShortVersionString</key><string>$VERSION</string>
   <key>CFBundleVersion</key><string>$VERSION</string>
-  <key>LSMinimumSystemVersion</key><string>12.0</string>
+  <key>LSMinimumSystemVersion</key><string>14.0</string>
   <key>LSUIElement</key><true/>
   <key>NSHighResolutionCapable</key><true/>
 </dict>
 </plist>
 EOF
 
-# Ad-hoc signature so the bundle runs locally. Distribution outside this Mac needs a Developer ID.
+# Ad-hoc signature. Gatekeeper requires explicit approval for this unnotarized build.
 codesign --force --deep --sign - "$APP"
 
 ZIP="$ROOT/dist/AIUsageWidget-$VERSION-$RID.zip"

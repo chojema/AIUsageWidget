@@ -5,7 +5,7 @@ English | [한국어](README.ko.md)
 AIUsageWidget is a small desktop app for Windows and macOS. It shows a usage panel right below your terminal window, so you can see how much of your AI coding agent limits remain without leaving the terminal.
 
 > **Version 0.0.9 — early release.**
-> Windows is the primary platform and has been tested. The macOS build has not been tested yet.
+> Downloads are available for Windows x64 and macOS (Apple Silicon and Intel). The macOS Apple Silicon build has passed a launch and settings/widget smoke test; the Intel build has not been run on an Intel Mac.
 
 ## What it shows
 
@@ -113,6 +113,16 @@ Place the app in a permanent folder before connecting, because Claude Code runs 
 
 The executable is not code-signed yet, so Windows SmartScreen may show a warning on first run.
 
+## Install (macOS)
+
+Requires macOS 14 or later. The .NET runtime is included; no separate .NET installation is needed.
+
+1. Download the zip for your Mac from [v0.0.9](https://github.com/chojema/AIUsageWidget/releases/tag/v0.0.9): **Apple Silicon (M-series)**: `AIUsageWidget-0.0.9-osx-arm64.zip`; **Intel**: `AIUsageWidget-0.0.9-osx-x64.zip`.
+2. Extract and move `AIUsageWidget.app` to `/Applications` before connecting Claude Code. When upgrading, quit the old app and replace it in the same location; settings are kept.
+3. Open the app. Use its menu bar icon to open **Settings…** and choose the display mode. In the default attached mode, the panel appears when a supported terminal is in front. The app does not appear in the Dock.
+
+These builds are ad-hoc signed, not Developer ID signed or notarized. If macOS blocks opening, follow [Apple's instructions](https://support.apple.com/102445): after attempting to open the app, use **System Settings → Privacy & Security → Open Anyway** only if you trust the download.
+
 ## Tray menu
 
 - **Show panel** (only while the panel is hidden)
@@ -153,7 +163,7 @@ macOS app bundle (`dist/osx-arm64/AIUsageWidget.app` and a release zip), run on 
 sh scripts/publish-macos.sh arm64   # or x64 for Intel Macs
 ```
 
-The macOS bundle gets an ad-hoc signature for local use. Distributing it to other Macs requires a Developer ID signature and notarization.
+The macOS bundle gets an ad-hoc signature. Developer ID signing and notarization are not included; see the installation notes above.
 
 ## Privacy and security
 
@@ -167,7 +177,7 @@ See [SECURITY.md](SECURITY.md) for how this repository keeps private data out of
 
 - The Antigravity output format is documented only in the CLI release notes and may change between versions.
 - Claude Code values update only while a Claude Code session is running.
-- macOS: untested so far; start at login is not available yet.
+- macOS: start at login is not available yet. Apple Silicon launch, settings, widget, input indicator and live Codex/Antigravity values were checked. Intel execution, terminal attachment across displays, and Claude Code integration on macOS remain unverified.
 - The panel follows a terminal window, not individual tabs inside it.
 
 ## License

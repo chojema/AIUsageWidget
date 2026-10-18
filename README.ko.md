@@ -7,7 +7,7 @@
 AIUsageWidget은 Windows와 macOS용 작은 데스크톱 앱입니다. 터미널 창 바로 아래에 사용량 보조창을 띄워, 터미널을 벗어나지 않고도 AI 코딩 에이전트의 남은 한도를 확인할 수 있게 합니다.
 
 > **버전 0.0.9 — 초기 릴리스**
-> 주 플랫폼인 Windows에서 시험했습니다. macOS 빌드는 아직 시험하지 않았습니다.
+> Windows x64와 macOS(Apple Silicon·Intel) 다운로드를 제공합니다. macOS Apple Silicon에서 실행과 설정·위젯 기본 동작을 확인했으며, Intel Mac에서는 실행하지 않았습니다.
 
 ## 표시 항목
 
@@ -115,6 +115,16 @@ Claude Code가 그 경로에서 앱을 실행하므로, 연결하기 전에 앱�
 
 실행 파일에 아직 코드 서명이 없어 처음 실행할 때 Windows SmartScreen 경고가 나올 수 있습니다.
 
+## 설치 (macOS)
+
+macOS 14 이상이 필요합니다. .NET 런타임이 포함되어 있어 별도로 설치할 필요가 없습니다.
+
+1. [v0.0.9](https://github.com/chojema/AIUsageWidget/releases/tag/v0.0.9)에서 Mac에 맞는 zip을 받습니다. **Apple Silicon(M 시리즈)**: `AIUsageWidget-0.0.9-osx-arm64.zip`, **Intel**: `AIUsageWidget-0.0.9-osx-x64.zip`.
+2. 압축을 풀고 Claude Code를 연결하기 전에 `AIUsageWidget.app`을 `/Applications`로 옮깁니다. 업데이트할 때는 기존 앱을 종료하고 같은 위치에서 교체하면 설정이 유지됩니다.
+3. 앱을 열고 메뉴 막대 아이콘의 **설정…**에서 표시 방식을 고릅니다. 기본 터미널 부착 모드에서는 지원 터미널이 앞에 있을 때 보조창이 나타납니다. Dock에는 아이콘이 나타나지 않습니다.
+
+이 빌드는 임시(ad-hoc) 서명만 적용되었으며 Developer ID 서명과 공증은 없습니다. macOS가 실행을 차단하면 [Apple 안내](https://support.apple.com/102445)에 따라 앱 실행을 시도한 뒤, 다운로드를 신뢰하는 경우에만 **시스템 설정 → 개인정보 보호 및 보안 → 확인 없이 열기**를 사용하세요.
+
 ## 트레이 메뉴
 
 - **보조창 다시 표시**(보조창을 숨겼을 때만)
@@ -155,7 +165,7 @@ macOS 앱 번들(`dist/osx-arm64/AIUsageWidget.app`와 릴리스용 zip)은 Mac�
 sh scripts/publish-macos.sh arm64   # Intel Mac은 x64
 ```
 
-macOS 번들에는 로컬 실행용 임시(ad-hoc) 서명만 들어갑니다. 다른 Mac에 배포하려면 Developer ID 서명과 공증이 필요합니다.
+macOS 번들에는 임시(ad-hoc) 서명만 들어갑니다. Developer ID 서명과 공증은 포함되지 않으며, 위 설치 안내를 참고하세요.
 
 ## 개인정보와 보안
 
@@ -169,7 +179,7 @@ macOS 번들에는 로컬 실행용 임시(ad-hoc) 서명만 들어갑니다. �
 
 - Antigravity 출력 형식은 CLI 릴리스 노트에만 적혀 있어 버전에 따라 바뀔 수 있습니다.
 - Claude Code 값은 Claude Code 세션이 실행 중일 때만 갱신됩니다.
-- macOS: 아직 시험하지 않았고, 로그인 시 자동 실행은 아직 없습니다.
+- macOS: 로그인 시 자동 실행은 아직 없습니다. Apple Silicon에서 실행, 설정, 위젯, 입력 상태와 Codex·Antigravity 실제 한도 표시를 확인했습니다. Intel 실행, 다중 화면 터미널 부착, macOS Claude Code 연결은 아직 검증하지 않았습니다.
 - 보조창은 터미널 창을 따라가며, 창 안의 개별 탭은 구분하지 않습니다.
 
 ## 라이선스
