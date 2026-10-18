@@ -22,12 +22,14 @@ public sealed class AppController : IDisposable, ISettingsHost
     private readonly Application _app;
     private readonly IClassicDesktopStyleApplicationLifetime _desktop;
     private readonly AppSettings _settings = AppSettings.Load();
+    private readonly List<SectionSetting> _sections;
     private readonly AntigravityProvider _antigravity;
     private readonly List<IUsageProvider> _providers;
     private readonly PanelWindow _panel = new();
     private readonly DispatcherTimer _trackTimer;
     private readonly DispatcherTimer _clockTimer;
     private readonly DispatcherTimer _saveWidgetTimer;
+    private readonly DispatcherTimer _secondTimer;
     private IForegroundTracker? _tracker;
     private IImeReader? _imeReader;
     private TrayIcon? _tray;
@@ -45,12 +47,14 @@ public sealed class AppController : IDisposable, ISettingsHost
         _app = app;
         _desktop = desktop;
         _strings = Strings.For(_settings.Language);
+        _sections = SectionLayout.Normalize(_settings.Sections, _settings.ShowIme);
         _antigravity = new AntigravityProvider(_settings.AntigravityGroup);
         _providers = [new CodexProvider(), new ClaudeProvider(), _antigravity];
         _trackTimer = new DispatcherTimer(TimeSpan.FromMilliseconds(OperatingSystem.IsMacOS() ? 250 : 150),
             DispatcherPriority.Background, (_, _) => Tick());
         _clockTimer = new DispatcherTimer(TimeSpan.FromSeconds(30), DispatcherPriority.Background, (_, _) => Render());
         _saveWidgetTimer = new DispatcherTimer(TimeSpan.FromMilliseconds(600), DispatcherPriority.Background, (_, _) => SaveWidgetPosition());
+        _secondTimer = new DispatcherTimer(TimeSpan.FromSeconds(1), DispatcherPriority.Background, (_, _) => RenderClock());
         _panel.PositionChanged += (_, _) => OnPanelMoved();
         _panel.RefreshClicked += RefreshAll;
         _panel.CloseClicked += OnCloseClicked;
@@ -68,10 +72,12 @@ public sealed class AppController : IDisposable, ISettingsHost
             provider.Start();
         }
         BuildTray();
+        _panel.ApplyLayout(VisibleSections);
         Render();
         ApplyDisplayMode();
         _trackTimer.Start();
         _clockTimer.Start();
+        _secondTimer.Start();
     }
 
     private (IForegroundTracker?, IImeReader?) CreatePlatformServices()
@@ -134,7 +140,7 @@ public sealed class AppController : IDisposable, ISettingsHost
 
     private void UpdateIme()
     {
-        if (!_settings.ShowIme || _imeReader is null)
+        if (!VisibleSections.Contains(SectionId.Ime) || _imeReader is null)
         {
             return;
         }
@@ -151,7 +157,7 @@ public sealed class AppController : IDisposable, ISettingsHost
         if (label != _imeLabel)
         {
             _imeLabel = label;
-            _panel.RenderIme(true, label, _strings);
+            _panel.RenderIme(label, _strings);
         }
     }
 
@@ -190,10 +196,11 @@ public sealed class AppController : IDisposable, ISettingsHost
             : primary;
 
         ScreenRect rect = PanelPlacement.Widget(_settings.WidgetX, _settings.WidgetY,
-            screens.All.Select(s => ToRect(s.WorkingArea)).ToList(), ToRect(primary.WorkingArea), target.Scaling);
+            screens.All.Select(s => ToRect(s.WorkingArea)).ToList(), ToRect(primary.WorkingArea), target.Scaling,
+            WidgetWidthDip);
 
         _placingWidget = true;
-        _panel.Width = PanelPlacement.WidgetWidthDip;
+        _panel.Width = WidgetWidthDip;
         _panel.Height = PanelPlacement.PanelHeightDip;
         _panel.Position = new PixelPoint(rect.X, rect.Y);
         _panel.Topmost = _settings.WidgetTopmost;
@@ -285,10 +292,30 @@ public sealed class AppController : IDisposable, ISettingsHost
         }
     }
 
+    private IReadOnlyList<SectionId> VisibleSections => SectionLayout.Visible(_sections);
+
+    private double WidgetWidthDip => PanelPlacement.WidgetWidthFor(VisibleSections, _settings.ShowSeconds);
+
     private void Render()
     {
-        _panel.Render(_providers.Select(p => p.Current), _strings, DateTimeOffset.Now);
-        _panel.RenderIme(_settings.ShowIme, _imeLabel, _strings);
+        _panel.Render(_providers.Select(p => p.Current), _strings, DateTimeOffset.Now, _settings.UsageDisplay);
+        _panel.RenderIme(_imeLabel, _strings);
+        RenderClock();
+    }
+
+    private void RenderClock() => _panel.RenderClock(DateTimeOffset.Now, _strings, _settings.ShowSeconds);
+
+    /// <summary>Saves the section list and lays the panel out again.</summary>
+    private void ApplySections()
+    {
+        _settings.Sections = _sections.Select(s => new SectionSetting { Id = s.Id, Visible = s.Visible }).ToList();
+        _settings.Save();
+        _panel.ApplyLayout(VisibleSections);
+        Render();
+        if (_settings.DisplayMode == DisplayMode.Widget && !_hiddenByUser)
+        {
+            ShowWidget(); // The widget width follows the visible sections.
+        }
     }
 
     private void RefreshAll() => _providers.ForEach(p => p.Refresh());
@@ -386,11 +413,41 @@ public sealed class AppController : IDisposable, ISettingsHost
         }
     }
 
-    public void SetShowIme(bool show)
+    public IReadOnlyList<SectionSetting> Sections => _sections;
+
+    public void SetSectionVisible(SectionId id, bool visible)
     {
-        _settings.ShowIme = show;
+        _sections.First(s => s.Id == id).Visible = visible;
+        if (id == SectionId.Ime)
+        {
+            _imeLabel = null;
+        }
+        ApplySections();
+    }
+
+    public void MoveSection(SectionId id, int delta)
+    {
+        if (SectionLayout.Move(_sections, id, delta))
+        {
+            ApplySections();
+        }
+    }
+
+    public void SetShowSeconds(bool show)
+    {
+        _settings.ShowSeconds = show;
         _settings.Save();
-        _imeLabel = null;
+        RenderClock();
+        if (_settings.DisplayMode == DisplayMode.Widget && !_hiddenByUser)
+        {
+            ShowWidget();
+        }
+    }
+
+    public void SetUsageDisplay(UsageDisplay display)
+    {
+        _settings.UsageDisplay = display;
+        _settings.Save();
         Render();
     }
 
@@ -532,6 +589,7 @@ public sealed class AppController : IDisposable, ISettingsHost
     {
         _trackTimer.Stop();
         _clockTimer.Stop();
+        _secondTimer.Stop();
         if (_saveWidgetTimer.IsEnabled)
         {
             SaveWidgetPosition();

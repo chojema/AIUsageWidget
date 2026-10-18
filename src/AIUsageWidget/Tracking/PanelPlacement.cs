@@ -6,13 +6,37 @@ public static class PanelPlacement
     public const double MinimumWidthDip = 360;
     public const double WidgetWidthDip = 1060;
 
+    /// <summary>Widget width for the visible sections: room for each usage section and badge.</summary>
+    public static double WidgetWidthFor(IReadOnlyList<Core.SectionId> visible, bool seconds)
+    {
+        double width = 12 + 6 + 6 + 20; // padding, gap and buttons
+        for (int i = 0; i < visible.Count; i++)
+        {
+            Core.SectionId id = visible[i];
+            width += id switch
+            {
+                Core.SectionId.Date => 76,
+                Core.SectionId.Weekday => 46,
+                Core.SectionId.Time => seconds ? 78 : 60,
+                Core.SectionId.Ime => 46,
+                _ => 300,
+            };
+            if (i > 0)
+            {
+                width += Core.SectionLayout.IsProvider(id) && Core.SectionLayout.IsProvider(visible[i - 1]) ? 16 : 8;
+            }
+        }
+        return Math.Max(width, MinimumWidthDip);
+    }
+
     /// <summary>
     /// Where the standalone widget goes: the saved position when it is still on a screen,
     /// otherwise the bottom-right corner of the primary work area.
     /// </summary>
-    public static ScreenRect Widget(int? savedX, int? savedY, IReadOnlyList<ScreenRect> workAreas, ScreenRect primaryWork, double scale)
+    public static ScreenRect Widget(int? savedX, int? savedY, IReadOnlyList<ScreenRect> workAreas, ScreenRect primaryWork, double scale,
+        double widthDip = WidgetWidthDip)
     {
-        int width = (int)Math.Round(WidgetWidthDip * scale);
+        int width = (int)Math.Round(widthDip * scale);
         int height = (int)Math.Round(PanelHeightDip * scale);
         if (savedX is { } x && savedY is { } y &&
             workAreas.FirstOrDefault(w => x + width / 2 >= w.X && x + width / 2 < w.Right &&

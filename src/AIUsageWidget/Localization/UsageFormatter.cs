@@ -8,6 +8,19 @@ public static class UsageFormatter
     public static string Remaining(UsageWindow window, Strings s) =>
         string.Format(CultureInfo.InvariantCulture, s.Left, Math.Round(window.RemainingPercent));
 
+    /// <summary>"62% left" or "38% used", following the user's choice.</summary>
+    public static string Percent(UsageWindow window, Strings s, UsageDisplay display) => display == UsageDisplay.Used
+        ? string.Format(CultureInfo.InvariantCulture, s.Used, Math.Round(Math.Clamp(window.UsedPercent, 0, 100)))
+        : Remaining(window, s);
+
+    public static string Date(DateTimeOffset now, Strings s) =>
+        now.ToLocalTime().ToString(s.MonthDayFormat, CultureInfo.GetCultureInfo(s.Code));
+
+    public static string Weekday(DateTimeOffset now, Strings s) => s.Days[(int)now.ToLocalTime().DayOfWeek];
+
+    public static string Time(DateTimeOffset now, bool seconds) =>
+        now.ToLocalTime().ToString(seconds ? "HH:mm:ss" : "HH:mm", CultureInfo.InvariantCulture);
+
     /// <summary>"resets 15:40 (in 1h 12m)", or with a weekday when the reset is more than a day away.</summary>
     public static string Reset(UsageWindow window, DateTimeOffset now, Strings s)
     {

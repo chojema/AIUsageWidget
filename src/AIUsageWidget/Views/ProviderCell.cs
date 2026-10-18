@@ -52,7 +52,7 @@ public sealed class ProviderCell : Grid
         Children.Add(_weekly.Panel);
     }
 
-    public void Render(ProviderSnapshot snapshot, Strings s, DateTimeOffset now)
+    public void Render(ProviderSnapshot snapshot, Strings s, DateTimeOffset now, UsageDisplay display)
     {
         _name.Text = snapshot.Label is { } label
             ? $"{Strings.ProviderName(_provider)} · {AntigravityUsageParser.ShortName(label)}"
@@ -69,8 +69,8 @@ public sealed class ProviderCell : Grid
         _status.Text = snapshot.UpdatedAt is { } updated && snapshot.Provider == ProviderId.ClaudeCode
             ? UsageFormatter.Updated(updated, now, s)
             : string.Empty;
-        _fiveHour.Show(s.FiveHour, snapshot.FiveHour, s, now);
-        _weekly.Show(s.Weekly, snapshot.Weekly, s, now);
+        _fiveHour.Show(s.FiveHour, snapshot.FiveHour, s, now, display);
+        _weekly.Show(s.Weekly, snapshot.Weekly, s, now, display);
     }
 
     private static TextBlock Text(string text, IBrush brush, FontWeight weight = FontWeight.Normal) => new()
@@ -113,7 +113,7 @@ public sealed class ProviderCell : Grid
 
         public DockPanel Panel { get; }
 
-        public void Show(string label, UsageWindow? window, Strings s, DateTimeOffset now)
+        public void Show(string label, UsageWindow? window, Strings s, DateTimeOffset now, UsageDisplay display)
         {
             _label.Text = label;
             _label.IsVisible = true;
@@ -127,10 +127,12 @@ public sealed class ProviderCell : Grid
             }
 
             double remaining = window.RemainingPercent;
-            _fill.Width = BarWidth * remaining / 100.0;
+            // The bar shows the same quantity as the text; its color always reflects what is left.
+            double shown = display == UsageDisplay.Used ? 100.0 - remaining : remaining;
+            _fill.Width = BarWidth * shown / 100.0;
             _fill.Background = remaining > 50 ? Good : remaining > 20 ? Warn : Low;
             string reset = UsageFormatter.Reset(window, now, s);
-            _value.Text = reset.Length > 0 ? $"{UsageFormatter.Remaining(window, s)} · {reset}" : UsageFormatter.Remaining(window, s);
+            _value.Text = reset.Length > 0 ? $"{UsageFormatter.Percent(window, s, display)} · {reset}" : UsageFormatter.Percent(window, s, display);
             _value.Foreground = Primary;
         }
 

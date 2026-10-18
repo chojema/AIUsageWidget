@@ -2,6 +2,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Layout;
 using Avalonia.Media;
+using Avalonia.Threading;
 using AIUsageWidget.Core;
 using AIUsageWidget.Localization;
 
@@ -17,7 +18,12 @@ public interface ISettingsHost
     bool StartAtLogin { get; set; }
     void SetDisplayMode(DisplayMode mode);
     void SetWidgetTopmost(bool topmost);
-    void SetShowIme(bool show);
+    /// <summary>Panel sections in display order.</summary>
+    IReadOnlyList<SectionSetting> Sections { get; }
+    void SetSectionVisible(SectionId id, bool visible);
+    void MoveSection(SectionId id, int delta);
+    void SetShowSeconds(bool show);
+    void SetUsageDisplay(UsageDisplay display);
     void SetLanguage(string code);
     void SetRefresh(RefreshPreset preset, int customMinutes);
     void SetCloseAction(CloseAction action);
@@ -41,9 +47,10 @@ public sealed class SettingsWindow : Window
     public SettingsWindow(ISettingsHost host)
     {
         _host = host;
-        Width = 480;
-        SizeToContent = SizeToContent.Height;
-        CanResize = false;
+        Width = 500;
+        Height = 760;
+        MinHeight = 400;
+        CanResize = true;
         WindowStartupLocation = WindowStartupLocation.CenterScreen;
         Build();
     }
@@ -97,6 +104,67 @@ public sealed class SettingsWindow : Window
         root.Children.Add(widget);
         root.Children.Add(Hint(s.ModeWidgetHint));
         root.Children.Add(topmost);
+
+        // Panel sections
+        root.Children.Add(Heading(s.SectionsHeading));
+        var sectionsHint = Hint(s.SectionsHint);
+        sectionsHint.Margin = new Thickness(0, 0, 0, 4);
+        root.Children.Add(sectionsHint);
+        IReadOnlyList<SectionSetting> sections = _host.Sections;
+        for (int i = 0; i < sections.Count; i++)
+        {
+            SectionId id = sections[i].Id;
+            var row = new Grid { ColumnDefinitions = new ColumnDefinitions("*,Auto,Auto") };
+            var visible = new CheckBox { Content = s.SectionName(id), IsChecked = sections[i].Visible };
+            visible.IsCheckedChanged += (_, _) =>
+            {
+                if (!_building)
+                {
+                    _host.SetSectionVisible(id, visible.IsChecked == true);
+                }
+            };
+            var up = new Button { Content = "↑", IsEnabled = i > 0, Padding = new Thickness(10, 2), Margin = new Thickness(4, 0) };
+            var down = new Button { Content = "↓", IsEnabled = i < sections.Count - 1, Padding = new Thickness(10, 2) };
+            ToolTip.SetTip(up, s.MoveUp);
+            ToolTip.SetTip(down, s.MoveDown);
+            up.Click += (_, _) => Reorder(id, -1);
+            down.Click += (_, _) => Reorder(id, +1);
+            Grid.SetColumn(up, 1);
+            Grid.SetColumn(down, 2);
+            row.Children.Add(visible);
+            row.Children.Add(up);
+            row.Children.Add(down);
+            root.Children.Add(row);
+        }
+
+        var seconds = new CheckBox { Content = s.ShowSeconds, IsChecked = settings.ShowSeconds, Margin = new Thickness(0, 4, 0, 0) };
+        seconds.IsCheckedChanged += (_, _) =>
+        {
+            if (!_building)
+            {
+                _host.SetShowSeconds(seconds.IsChecked == true);
+            }
+        };
+        root.Children.Add(seconds);
+
+        UsageDisplay[] displays = [UsageDisplay.Remaining, UsageDisplay.Used];
+        var usageDisplay = new ComboBox
+        {
+            ItemsSource = new[] { s.UsageRemaining, s.UsageUsed },
+            SelectedIndex = Math.Max(0, Array.IndexOf(displays, settings.UsageDisplay)),
+            MinWidth = 200,
+        };
+        usageDisplay.SelectionChanged += (_, _) =>
+        {
+            if (!_building && usageDisplay.SelectedIndex >= 0)
+            {
+                _host.SetUsageDisplay(displays[usageDisplay.SelectedIndex]);
+            }
+        };
+        var usageRow = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 12, Margin = new Thickness(0, 6, 0, 0) };
+        usageRow.Children.Add(new TextBlock { Text = s.UsageDisplay, VerticalAlignment = VerticalAlignment.Center });
+        usageRow.Children.Add(usageDisplay);
+        root.Children.Add(usageRow);
 
         // Refresh
         root.Children.Add(Heading(s.RefreshSection));
@@ -177,15 +245,6 @@ public sealed class SettingsWindow : Window
         closeRow.Children.Add(new TextBlock { Text = s.CloseButtonAction, VerticalAlignment = VerticalAlignment.Center });
         closeRow.Children.Add(closeAction);
         root.Children.Add(closeRow);
-        var showIme = new CheckBox { Content = s.ShowIme, IsChecked = settings.ShowIme };
-        showIme.IsCheckedChanged += (_, _) =>
-        {
-            if (!_building)
-            {
-                _host.SetShowIme(showIme.IsChecked == true);
-            }
-        };
-        root.Children.Add(showIme);
 
         if (_host.StartAtLoginSupported)
         {
@@ -263,7 +322,7 @@ public sealed class SettingsWindow : Window
         {
             string? error = _host.SetClaudeConnected(!_host.ClaudeConnected);
             Build();
-            if (error is not null && Content is StackPanel panel)
+            if (error is not null && Content is ScrollViewer { Content: StackPanel panel })
             {
                 panel.Children.Insert(panel.Children.Count - 1, new TextBlock
                 {
@@ -286,8 +345,18 @@ public sealed class SettingsWindow : Window
         close.Click += (_, _) => Close();
         root.Children.Add(close);
 
-        Content = root;
+        double offset = (Content as ScrollViewer)?.Offset.Y ?? 0;
+        var scroll = new ScrollViewer { Content = root, HorizontalScrollBarVisibility = Avalonia.Controls.Primitives.ScrollBarVisibility.Disabled };
+        Content = scroll;
+        // Keep the scroll position when the content is rebuilt, for example after reordering.
+        Dispatcher.UIThread.Post(() => scroll.Offset = new Vector(0, offset), DispatcherPriority.Loaded);
         _building = false;
+    }
+
+    private void Reorder(SectionId id, int delta)
+    {
+        _host.MoveSection(id, delta);
+        Build();
     }
 
     private static TextBlock Heading(string text) => new()

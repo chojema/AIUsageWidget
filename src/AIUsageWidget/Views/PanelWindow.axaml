@@ -31,8 +31,9 @@
   </Window.Styles>
   <Border x:Name="Frame" Background="#F2181A1F" BorderBrush="#33FFFFFF" BorderThickness="0,1,0,0" Padding="12,4,6,4">
     <Panel>
-      <Grid x:Name="Cells" ColumnDefinitions="*,16,*,16,*,12,Auto,6,Auto">
-        <StackPanel x:Name="Buttons" Grid.Column="8" VerticalAlignment="Center" Spacing="2">
+      <!-- Columns are created from the section order in PanelWindow.ApplyLayout. -->
+      <Grid x:Name="Cells">
+        <StackPanel x:Name="Buttons" VerticalAlignment="Center" Spacing="2">
           <Button x:Name="CloseButton" Classes="panel" Content="✕" />
           <Button x:Name="RefreshButton" Classes="panel" Content="↻" FontSize="13" />
         </StackPanel>

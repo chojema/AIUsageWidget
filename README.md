@@ -4,10 +4,22 @@ English | [한국어](README.ko.md)
 
 AIUsageWidget is a small desktop app for Windows and macOS. It shows a usage panel right below your terminal window, so you can see how much of your AI coding agent limits remain without leaving the terminal.
 
-> **Source: version 0.0.3 (in development). Latest release: 0.0.2.** Antigravity support is in the source and arrives with the next release.
+> **Version 0.0.9 — early release.**
 > Windows is the primary platform and has been tested. The macOS build has not been tested yet.
 
 ## What it shows
+
+The panel is made of sections. Each one can be shown or hidden and moved in **Settings → Panel sections**:
+
+| Section | Content |
+|---|---|
+| Codex, Claude Code, Antigravity | Usage limits (below) |
+| Date | Month and day, for example "Oct 18" |
+| Day of the week | For example "Sun"; weekends are highlighted |
+| Current time | "18:04", or "18:04:15" with **Show seconds in the time** |
+| Keyboard input | EN / 한 (see below) |
+
+By default the usage sections come first, followed by the date, day, time and keyboard input.
 
 For each supported agent:
 
@@ -15,6 +27,8 @@ For each supported agent:
 |---|---|
 | 5h | Remaining share of the 5-hour usage limit and when it resets |
 | Week | Remaining share of the weekly usage limit and when it resets |
+
+Usage can be shown as the share left ("62% left", default) or the share used ("38% used"); choose in **Settings → Usage display**. The bar shows the same quantity as the text, and its color always reflects what is left.
 
 Reset times are shown as a clock time (with the weekday when more than a day away) and as time remaining. When a value is unavailable, the panel says why (not installed, not signed in, not connected, waiting for data) instead of showing a made-up number.
 
@@ -43,7 +57,7 @@ The right end of the panel has two small buttons:
 
 ## Keyboard input indicator
 
-The right end of the panel shows the keyboard input state of the window in front: **EN** or **한** (Korean), and the language code for other input methods (for example JA or ZH). It can be turned off in Settings.
+The right end of the panel shows the keyboard input state of the window in front: **EN** or **한** (Korean), and the language code for other input methods (for example JA or ZH). It can be turned off in Settings → Panel sections.
 
 - Windows: read from the keyboard layout and the IME conversion mode of the focused window.
 - macOS: read from the current input source.
@@ -93,7 +107,7 @@ Place the app in a permanent folder before connecting, because Claude Code runs 
 
 ## Install (Windows)
 
-1. Download `AIUsageWidget-0.0.2-win-x64.zip` from [Releases](https://github.com/chojema/AIUsageWidget/releases) and extract `AIUsageWidget.exe` to a permanent folder, for example `%LOCALAPPDATA%\Programs\AIUsageWidget`.
+1. Download `AIUsageWidget-0.0.9-win-x64.zip` from [Releases](https://github.com/chojema/AIUsageWidget/releases) and extract `AIUsageWidget.exe` to a permanent folder, for example `%LOCALAPPDATA%\Programs\AIUsageWidget`.
 2. Run `AIUsageWidget.exe`. An icon appears in the notification area (tray).
 3. Optional: open **Settings** to choose the display mode, connect Claude Code, or start at login.
 
@@ -102,7 +116,7 @@ The executable is not code-signed yet, so Windows SmartScreen may show a warning
 ## Tray menu
 
 - **Show panel** (only while the panel is hidden)
-- **Settings…** (also opens with a click on the tray icon): display mode, widget on top, refresh interval, close button action, input indicator, start at login, language, Antigravity model group, Claude Code connection
+- **Settings…** (also opens with a click on the tray icon): display mode, widget on top, panel sections and their order, seconds, usage display, refresh interval, close button action, start at login, language, Antigravity model group, Claude Code connection
 - **Language**: System default, English, or 한국어 (Korean)
 - **Connect / Disconnect Claude Code**
 - **Start at login** (Windows)

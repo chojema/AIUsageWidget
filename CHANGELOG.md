@@ -1,7 +1,14 @@
 # Changelog
 
-## 0.0.3 — not yet released
+## 0.0.9 — 2026-10-18
 
+Versions 0.0.3 to 0.0.8 were not released; their changes are included here.
+
+- Date, day of the week and current time sections (seconds optional), placed left of the keyboard input section by default.
+- Panel sections: show or hide each of the seven sections and change their order in Settings. The earlier keyboard input on/off setting carries over.
+- Usage display: share left ("62% left") or share used ("38% used").
+- The standalone widget width follows the visible sections.
+- The settings window scrolls and can be resized.
 - Antigravity CLI limits through the read-only `agy -p /usage --output-format json` command, with the 5-hour and weekly windows and reset times.
 - Antigravity model group selection in Settings; the panel title shows the group in use.
 - Safety check: the Antigravity answer is accepted only when no agent turn ran; otherwise collection stops for the session.

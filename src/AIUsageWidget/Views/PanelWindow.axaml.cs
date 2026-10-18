@@ -2,9 +2,11 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Markup.Xaml;
+using Avalonia.Media;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 using AIUsageWidget.Core;
+using AIUsageWidget.Ime;
 using AIUsageWidget.Localization;
 
 namespace AIUsageWidget.Views;
@@ -13,8 +15,16 @@ public sealed partial class PanelWindow : Window
 {
     private static readonly TimeSpan PromptTimeout = TimeSpan.FromSeconds(8);
 
-    private readonly Dictionary<ProviderId, ProviderCell> _cells = new();
-    private readonly ImeCell _ime = new();
+    private readonly Dictionary<ProviderId, ProviderCell> _providers = new();
+    private readonly Dictionary<SectionId, BadgeCell> _badges = new()
+    {
+        [SectionId.Date] = new BadgeCell(64),
+        [SectionId.Weekday] = new BadgeCell(44),
+        [SectionId.Time] = new BadgeCell(56),
+        [SectionId.Ime] = new BadgeCell(44),
+    };
+    private readonly Grid _cells;
+    private readonly StackPanel _buttons;
     private readonly Border _frame;
     private readonly Border _closePrompt;
     private readonly TextBlock _closePromptText;
@@ -29,6 +39,8 @@ public sealed partial class PanelWindow : Window
     {
         AvaloniaXamlLoader.Load(this);
         _frame = this.FindControl<Border>("Frame")!;
+        _cells = this.FindControl<Grid>("Cells")!;
+        _buttons = this.FindControl<StackPanel>("Buttons")!;
         _closePrompt = this.FindControl<Border>("ClosePrompt")!;
         _closePromptText = this.FindControl<TextBlock>("ClosePromptText")!;
         _closeButton = this.FindControl<Button>("CloseButton")!;
@@ -37,17 +49,11 @@ public sealed partial class PanelWindow : Window
         _quitButton = this.FindControl<Button>("QuitButton")!;
         _cancelButton = this.FindControl<Button>("CancelButton")!;
 
-        Grid cells = this.FindControl<Grid>("Cells")!;
-        ProviderId[] order = [ProviderId.Codex, ProviderId.ClaudeCode, ProviderId.Antigravity];
-        for (int i = 0; i < order.Length; i++)
+        foreach (ProviderId id in Enum.GetValues<ProviderId>())
         {
-            var cell = new ProviderCell(order[i]);
-            Grid.SetColumn(cell, i * 2);
-            cells.Children.Add(cell);
-            _cells[order[i]] = cell;
+            _providers[id] = new ProviderCell(id);
         }
-        Grid.SetColumn(_ime, 6);
-        cells.Children.Add(_ime);
+        ApplyLayout(SectionLayout.DefaultOrder);
 
         _promptTimer = new DispatcherTimer(PromptTimeout, DispatcherPriority.Background, (_, _) => HideClosePrompt());
         _promptTimer.Stop();
@@ -72,7 +78,7 @@ public sealed partial class PanelWindow : Window
     /// <summary>The ✕ button was clicked.</summary>
     public event Action? CloseClicked;
 
-    /// <summary>The ⟳ button was clicked.</summary>
+    /// <summary>The ↻ button was clicked.</summary>
     public event Action? RefreshClicked;
 
     /// <summary>"Hide panel" was chosen in the close prompt.</summary>
@@ -95,13 +101,53 @@ public sealed partial class PanelWindow : Window
         }
     }
 
-    public void Render(IEnumerable<ProviderSnapshot> snapshots, Strings strings, DateTimeOffset now)
+    /// <summary>Lays out the visible sections in the given order, followed by the buttons.</summary>
+    public void ApplyLayout(IReadOnlyList<SectionId> visible)
+    {
+        _cells.Children.Clear();
+        _cells.ColumnDefinitions.Clear();
+
+        SectionId? previous = null;
+        foreach (SectionId id in visible)
+        {
+            if (previous is { } p)
+            {
+                // Wider gaps between usage sections, narrower ones around the small badges.
+                bool bothProviders = SectionLayout.IsProvider(p) && SectionLayout.IsProvider(id);
+                _cells.ColumnDefinitions.Add(new ColumnDefinition(new GridLength(bothProviders ? 16 : 8)));
+            }
+
+            Control cell = SectionLayout.ProviderOf(id) is { } provider ? _providers[provider] : _badges[id];
+            _cells.ColumnDefinitions.Add(new ColumnDefinition(
+                SectionLayout.IsProvider(id) ? new GridLength(1, GridUnitType.Star) : GridLength.Auto));
+            Grid.SetColumn(cell, _cells.ColumnDefinitions.Count - 1);
+            _cells.Children.Add(cell);
+            previous = id;
+        }
+
+        if (!visible.Any(SectionLayout.IsProvider))
+        {
+            // Without a usage section, push the badges and buttons to the right edge.
+            _cells.ColumnDefinitions.Insert(0, new ColumnDefinition(new GridLength(1, GridUnitType.Star)));
+            foreach (Control child in _cells.Children)
+            {
+                Grid.SetColumn(child, Grid.GetColumn(child) + 1);
+            }
+        }
+
+        _cells.ColumnDefinitions.Add(new ColumnDefinition(new GridLength(6)));
+        _cells.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Auto));
+        Grid.SetColumn(_buttons, _cells.ColumnDefinitions.Count - 1);
+        _cells.Children.Add(_buttons);
+    }
+
+    public void Render(IEnumerable<ProviderSnapshot> snapshots, Strings strings, DateTimeOffset now, UsageDisplay display)
     {
         foreach (ProviderSnapshot snapshot in snapshots)
         {
-            if (_cells.TryGetValue(snapshot.Provider, out ProviderCell? cell))
+            if (_providers.TryGetValue(snapshot.Provider, out ProviderCell? cell))
             {
-                cell.Render(snapshot, strings, now);
+                cell.Render(snapshot, strings, now, display);
             }
         }
 
@@ -113,14 +159,16 @@ public sealed partial class PanelWindow : Window
         _cancelButton.Content = strings.Cancel;
     }
 
-    public void RenderIme(bool visible, string? label, Strings strings)
+    public void RenderClock(DateTimeOffset now, Strings strings, bool seconds)
     {
-        _ime.IsVisible = visible;
-        if (visible)
-        {
-            _ime.Render(label, strings.ImeTitle);
-        }
+        _badges[SectionId.Date].Render(strings.DateTitle, UsageFormatter.Date(now, strings));
+        _badges[SectionId.Weekday].Render(strings.WeekdayTitle, UsageFormatter.Weekday(now, strings),
+            now.ToLocalTime().DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday ? BadgeCell.Accent : BadgeCell.Neutral);
+        _badges[SectionId.Time].Render(strings.TimeTitle, UsageFormatter.Time(now, seconds));
     }
+
+    public void RenderIme(string? label, Strings strings) =>
+        _badges[SectionId.Ime].Render(strings.ImeTitle, label, label == ImeLabel.Hangul ? BadgeCell.Accent : BadgeCell.Info);
 
     /// <summary>Shows the choice between hiding the panel and quitting, inside the panel itself.</summary>
     public void ShowClosePrompt()
@@ -138,7 +186,8 @@ public sealed partial class PanelWindow : Window
 
     private void OnPointerPressed(object? sender, PointerPressedEventArgs e)
     {
-        if (Draggable && e.GetCurrentPoint(this).Properties.IsLeftButtonPressed && (e.Source as Visual)?.FindAncestorOfType<Button>(includeSelf: true) is null)
+        if (Draggable && e.GetCurrentPoint(this).Properties.IsLeftButtonPressed &&
+            (e.Source as Visual)?.FindAncestorOfType<Button>(includeSelf: true) is null)
         {
             BeginMoveDrag(e);
         }

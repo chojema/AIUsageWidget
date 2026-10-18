@@ -24,6 +24,15 @@ public enum RefreshPreset
     Custom,
 }
 
+[JsonConverter(typeof(JsonStringEnumConverter<UsageDisplay>))]
+public enum UsageDisplay
+{
+    /// <summary>"62% left"</summary>
+    Remaining,
+    /// <summary>"38% used"</summary>
+    Used,
+}
+
 [JsonConverter(typeof(JsonStringEnumConverter<CloseAction>))]
 public enum CloseAction
 {
@@ -49,8 +58,20 @@ public sealed class AppSettings
     /// <summary>Keeps the widget above other windows.</summary>
     public bool WidgetTopmost { get; set; } = true;
 
-    /// <summary>Shows the keyboard input state (for example EN or 한) at the right end of the panel.</summary>
+    /// <summary>
+    /// Earlier versions' on/off setting for the keyboard input section. It is only read once to
+    /// initialize <see cref="Sections"/>.
+    /// </summary>
     public bool ShowIme { get; set; } = true;
+
+    /// <summary>Panel sections in display order with their visibility; null until first saved.</summary>
+    public List<SectionSetting>? Sections { get; set; }
+
+    /// <summary>Shows seconds in the time section.</summary>
+    public bool ShowSeconds { get; set; }
+
+    /// <summary>Whether usage is shown as the share left or the share used.</summary>
+    public UsageDisplay UsageDisplay { get; set; } = UsageDisplay.Remaining;
 
     /// <summary>How often Codex and Antigravity are queried.</summary>
     public RefreshPreset RefreshPreset { get; set; } = RefreshPreset.FiveMinutes;

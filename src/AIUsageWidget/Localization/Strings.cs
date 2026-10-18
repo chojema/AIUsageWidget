@@ -77,6 +77,23 @@ public sealed class Strings
         cancel: "Cancel",
         menuShowPanel: "Show panel",
         closeTooltip: "Close",
+        used: "{0}% used",
+        sectionsHeading: "Panel sections",
+        sectionsHint: "Choose which sections to show and change their order with the arrows.",
+        moveUp: "Move up",
+        moveDown: "Move down",
+        sectionDate: "Date",
+        sectionWeekday: "Day of the week",
+        sectionTime: "Current time",
+        sectionIme: "Keyboard input (EN / 한)",
+        showSeconds: "Show seconds in the time",
+        usageDisplay: "Usage display",
+        usageRemaining: "Remaining (% left)",
+        usageUsed: "Used (% used)",
+        dateTitle: "Date",
+        weekdayTitle: "Day",
+        timeTitle: "Time",
+        monthDayFormat: "MMM d",
         days: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]);
 
     public static Strings Korean { get; } = new(
@@ -150,6 +167,23 @@ public sealed class Strings
         cancel: "취소",
         menuShowPanel: "보조창 다시 표시",
         closeTooltip: "닫기",
+        used: "{0}% 사용",
+        sectionsHeading: "보조창 섹션",
+        sectionsHint: "표시할 섹션을 고르고 화살표로 순서를 바꿉니다.",
+        moveUp: "위로",
+        moveDown: "아래로",
+        sectionDate: "날짜",
+        sectionWeekday: "요일",
+        sectionTime: "현재 시각",
+        sectionIme: "키보드 입력 상태 (EN / 한)",
+        showSeconds: "시각에 초 표시",
+        usageDisplay: "사용량 표시",
+        usageRemaining: "남은 양 (% 남음)",
+        usageUsed: "사용한 양 (% 사용)",
+        dateTitle: "날짜",
+        weekdayTitle: "요일",
+        timeTitle: "시각",
+        monthDayFormat: "M월 d일",
         days: ["일", "월", "화", "수", "목", "금", "토"]);
 
     private Strings(string code, string fiveHour, string weekly, string left, string resets, string resetsIn,
@@ -157,7 +191,7 @@ public sealed class Strings
         string notConnected, string waiting, string waitingClaude, string unsupported, string error, string starting,
         string menuLanguage, string menuSystemLanguage, string menuConnectClaude, string menuDisconnectClaude,
         string menuStartAtLogin, string menuRefresh, string menuOpenProject, string menuQuit,
-        string claudeConnectFailed, string menuSettings, string settingsTitle, string displayMode, string modeTerminal, string modeTerminalHint, string modeWidget, string modeWidgetHint, string widgetTopmost, string showIme, string claudeSection, string claudeConnected, string claudeDisconnected, string connect, string disconnect, string general, string close, string imeTitle, string antigravityHalted, string antigravitySection, string antigravityGroup, string antigravityGroupHint, string antigravityGroupsPending, string refreshSection, string refreshInterval, string refreshManual, string refreshOneMinute, string refreshFiveMinutes, string refreshThirtyMinutes, string refreshOneHour, string refreshCustom, string minutesUnit, string refreshHint, string refreshManualHint, string closeButtonAction, string closeAsk, string closeHide, string closeQuit, string closePrompt, string closeHideButton, string closeQuitButton, string cancel, string menuShowPanel, string closeTooltip, string[] days)
+        string claudeConnectFailed, string menuSettings, string settingsTitle, string displayMode, string modeTerminal, string modeTerminalHint, string modeWidget, string modeWidgetHint, string widgetTopmost, string showIme, string claudeSection, string claudeConnected, string claudeDisconnected, string connect, string disconnect, string general, string close, string imeTitle, string antigravityHalted, string antigravitySection, string antigravityGroup, string antigravityGroupHint, string antigravityGroupsPending, string refreshSection, string refreshInterval, string refreshManual, string refreshOneMinute, string refreshFiveMinutes, string refreshThirtyMinutes, string refreshOneHour, string refreshCustom, string minutesUnit, string refreshHint, string refreshManualHint, string closeButtonAction, string closeAsk, string closeHide, string closeQuit, string closePrompt, string closeHideButton, string closeQuitButton, string cancel, string menuShowPanel, string closeTooltip, string used, string sectionsHeading, string sectionsHint, string moveUp, string moveDown, string sectionDate, string sectionWeekday, string sectionTime, string sectionIme, string showSeconds, string usageDisplay, string usageRemaining, string usageUsed, string dateTitle, string weekdayTitle, string timeTitle, string monthDayFormat, string[] days)
     {
         Code = code;
         FiveHour = fiveHour;
@@ -229,6 +263,23 @@ public sealed class Strings
         Cancel = cancel;
         MenuShowPanel = menuShowPanel;
         CloseTooltip = closeTooltip;
+        Used = used;
+        SectionsHeading = sectionsHeading;
+        SectionsHint = sectionsHint;
+        MoveUp = moveUp;
+        MoveDown = moveDown;
+        SectionDate = sectionDate;
+        SectionWeekday = sectionWeekday;
+        SectionTime = sectionTime;
+        SectionIme = sectionIme;
+        ShowSeconds = showSeconds;
+        UsageDisplay = usageDisplay;
+        UsageRemaining = usageRemaining;
+        UsageUsed = usageUsed;
+        DateTitle = dateTitle;
+        WeekdayTitle = weekdayTitle;
+        TimeTitle = timeTitle;
+        MonthDayFormat = monthDayFormat;
         Days = days;
     }
 
@@ -302,6 +353,23 @@ public sealed class Strings
     public string Cancel { get; }
     public string MenuShowPanel { get; }
     public string CloseTooltip { get; }
+    public string Used { get; }
+    public string SectionsHeading { get; }
+    public string SectionsHint { get; }
+    public string MoveUp { get; }
+    public string MoveDown { get; }
+    public string SectionDate { get; }
+    public string SectionWeekday { get; }
+    public string SectionTime { get; }
+    public string SectionIme { get; }
+    public string ShowSeconds { get; }
+    public string UsageDisplay { get; }
+    public string UsageRemaining { get; }
+    public string UsageUsed { get; }
+    public string DateTitle { get; }
+    public string WeekdayTitle { get; }
+    public string TimeTitle { get; }
+    public string MonthDayFormat { get; }
     public string[] Days { get; }
 
     /// <summary>Resolves a setting value ("system", "en", "ko") to a string table.</summary>
@@ -317,6 +385,18 @@ public sealed class Strings
         ProviderId.Codex => "Codex",
         ProviderId.ClaudeCode => "Claude Code",
         ProviderId.Antigravity => "Antigravity",
+        _ => id.ToString(),
+    };
+
+    public string SectionName(SectionId id) => id switch
+    {
+        SectionId.Codex => ProviderName(ProviderId.Codex),
+        SectionId.ClaudeCode => ProviderName(ProviderId.ClaudeCode),
+        SectionId.Antigravity => ProviderName(ProviderId.Antigravity),
+        SectionId.Date => SectionDate,
+        SectionId.Weekday => SectionWeekday,
+        SectionId.Time => SectionTime,
+        SectionId.Ime => SectionIme,
         _ => id.ToString(),
     };
 
