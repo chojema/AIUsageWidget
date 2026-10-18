@@ -19,6 +19,11 @@ public interface ISettingsHost
     void SetWidgetTopmost(bool topmost);
     void SetShowIme(bool show);
     void SetLanguage(string code);
+    /// <summary>Antigravity model groups from the last successful read.</summary>
+    IReadOnlyList<string> AntigravityGroups { get; }
+    /// <summary>The group shown in the panel after any fallback.</summary>
+    string? AntigravityShownGroup { get; }
+    void SetAntigravityGroup(string group);
     /// <summary>Returns an error message, or null on success.</summary>
     string? SetClaudeConnected(bool connected);
 }
@@ -135,6 +140,39 @@ public sealed class SettingsWindow : Window
         languageRow.Children.Add(new TextBlock { Text = s.MenuLanguage, VerticalAlignment = VerticalAlignment.Center });
         languageRow.Children.Add(language);
         root.Children.Add(languageRow);
+
+        // Antigravity
+        root.Children.Add(Heading(s.AntigravitySection));
+        IReadOnlyList<string> groups = _host.AntigravityGroups;
+        if (groups.Count == 0)
+        {
+            var pending = Hint(s.AntigravityGroupsPending);
+            pending.Margin = new Thickness(0);
+            root.Children.Add(pending);
+        }
+        else
+        {
+            var groupBox = new ComboBox
+            {
+                ItemsSource = groups,
+                SelectedItem = _host.AntigravityShownGroup,
+                MinWidth = 220,
+            };
+            groupBox.SelectionChanged += (_, _) =>
+            {
+                if (!_building && groupBox.SelectedItem is string group)
+                {
+                    _host.SetAntigravityGroup(group);
+                }
+            };
+            var groupRow = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 12 };
+            groupRow.Children.Add(new TextBlock { Text = s.AntigravityGroup, VerticalAlignment = VerticalAlignment.Center });
+            groupRow.Children.Add(groupBox);
+            root.Children.Add(groupRow);
+            var groupHint = Hint(s.AntigravityGroupHint);
+            groupHint.Margin = new Thickness(0, 2, 0, 0);
+            root.Children.Add(groupHint);
+        }
 
         // Claude Code
         root.Children.Add(Heading(s.ClaudeSection));

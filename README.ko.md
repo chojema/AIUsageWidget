@@ -6,7 +6,7 @@
 
 AIUsageWidget은 Windows와 macOS용 작은 데스크톱 앱입니다. 터미널 창 바로 아래에 사용량 보조창을 띄워, 터미널을 벗어나지 않고도 AI 코딩 에이전트의 남은 한도를 확인할 수 있게 합니다.
 
-> **버전 0.0.2 — 초기 릴리스**
+> **소스: 버전 0.0.3(개발 중). 최신 릴리스: 0.0.2.** Antigravity 지원은 소스에 들어 있으며 다음 릴리스에 포함됩니다.
 > 주 플랫폼인 Windows에서 시험했습니다. macOS 빌드는 아직 시험하지 않았습니다.
 
 ## 표시 항목
@@ -55,7 +55,17 @@ AIUsageWidget은 각 CLI의 공식 인터페이스만 사용합니다. 인증 �
 |---|---|---|
 | Codex CLI | `codex app-server` (`account/rateLimits/read`, `account/rateLimits/updated`) | 없음. CLI에 로그인되어 있으면 됩니다. |
 | Claude Code | 상태 표시줄 데이터 (`rate_limits.five_hour`, `rate_limits.seven_day`) | 트레이 메뉴에서 **Claude Code 연결**을 한 번 누릅니다. |
-| Antigravity CLI | 제공 안 됨 | CLI가 대화형 `/usage` 패널에서만 한도를 보여 주고, 다른 프로그램용 공식 인터페이스가 아직 없습니다. 보조창에 이 상태를 표시합니다. |
+| Antigravity CLI | `agy -p /usage --output-format json` (읽기 전용 print 모드 명령, agy 1.1.12 이상) | 없음. CLI에 로그인되어 있으면 됩니다. 모델 그룹은 설정에서 고릅니다. |
+
+### Antigravity 모델 그룹
+
+Antigravity는 모델 그룹(예: *Gemini Models*, *Claude and GPT models*)마다 5시간 한도와 주간 한도를 따로 알려 줍니다. 보조창에는 한 번에 한 그룹을 보여 주며, 제목에 그룹 이름을 함께 표시합니다(예: "Antigravity · Gemini").
+
+- **설정 → Antigravity → 모델 그룹**에서 고릅니다. 목록은 CLI에서 받아 오므로 새 그룹도 자동으로 나타납니다.
+- 고르기 전에는 *Gemini Models*를 보여 줍니다(그 그룹이 없으면 첫 그룹).
+- 고른 그룹이 요금제 변경 등으로 사라지면 같은 방식으로 대체합니다.
+
+명령은 셸을 거치지 않고 2분마다 실행하며, 에이전트 턴이 실행되지 않았음이 확인된 응답만 받아들입니다. CLI가 다르게 응답하면 그 세션 동안 수집을 멈춰, 백그라운드에서 한도가 소비되지 않게 합니다.
 
 ### Claude Code 연결
 
@@ -128,7 +138,7 @@ macOS 번들에는 로컬 실행용 임시(ad-hoc) 서명만 들어갑니다. �
 
 ## 알려진 제한
 
-- 공식 인터페이스가 생기기 전까지 Antigravity 한도는 표시할 수 없습니다.
+- Antigravity 출력 형식은 CLI 릴리스 노트에만 적혀 있어 버전에 따라 바뀔 수 있습니다.
 - Claude Code 값은 Claude Code 세션이 실행 중일 때만 갱신됩니다.
 - macOS: 아직 시험하지 않았고, 로그인 시 자동 실행은 아직 없습니다.
 - 보조창은 터미널 창을 따라가며, 창 안의 개별 탭은 구분하지 않습니다.

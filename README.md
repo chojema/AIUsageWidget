@@ -4,7 +4,7 @@ English | [한국어](README.ko.md)
 
 AIUsageWidget is a small desktop app for Windows and macOS. It shows a usage panel right below your terminal window, so you can see how much of your AI coding agent limits remain without leaving the terminal.
 
-> **Version 0.0.2 — early release.**
+> **Source: version 0.0.3 (in development). Latest release: 0.0.2.** Antigravity support is in the source and arrives with the next release.
 > Windows is the primary platform and has been tested. The macOS build has not been tested yet.
 
 ## What it shows
@@ -53,7 +53,17 @@ AIUsageWidget uses only official interfaces of each CLI. It never reads your cre
 |---|---|---|
 | Codex CLI | `codex app-server` (`account/rateLimits/read`, `account/rateLimits/updated`) | None. Being signed in to the CLI is enough. |
 | Claude Code | Status line data (`rate_limits.five_hour`, `rate_limits.seven_day`) | One click: **Connect Claude Code** in the tray menu. |
-| Antigravity CLI | Not available | The CLI shows quota only in its interactive `/usage` panel and has no official interface for other programs yet. The panel shows this state. |
+| Antigravity CLI | `agy -p /usage --output-format json` (read-only print-mode command; agy 1.1.12 or later) | None. Being signed in to the CLI is enough. Choose the model group in Settings. |
+
+### Antigravity model groups
+
+Antigravity reports separate 5-hour and weekly limits for each model group (for example *Gemini Models* and *Claude and GPT models*). The panel shows one group at a time, with its name in the title (for example "Antigravity · Gemini"):
+
+- Pick the group in **Settings → Antigravity → Model group**. The list comes from the CLI, so new groups appear automatically.
+- Until you choose, *Gemini Models* is shown (or the first group if that one does not exist).
+- If the chosen group disappears, for example after a plan change, the panel falls back the same way.
+
+The command runs every 2 minutes without a shell, and its answer is accepted only when it shows that no agent turn ran. If the CLI ever answers differently, collection stops for the session so that no quota can be spent in the background.
 
 ### Claude Code connection
 
@@ -126,7 +136,7 @@ See [SECURITY.md](SECURITY.md) for how this repository keeps private data out of
 
 ## Known limitations
 
-- Antigravity limits cannot be shown until an official interface exists.
+- The Antigravity output format is documented only in the CLI release notes and may change between versions.
 - Claude Code values update only while a Claude Code session is running.
 - macOS: untested so far; start at login is not available yet.
 - The panel follows a terminal window, not individual tabs inside it.

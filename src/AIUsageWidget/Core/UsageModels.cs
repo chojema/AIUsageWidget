@@ -40,7 +40,8 @@ public sealed record ProviderSnapshot(
     UsageWindow? FiveHour = null,
     UsageWindow? Weekly = null,
     DateTimeOffset? UpdatedAt = null,
-    string? Detail = null)
+    string? Detail = null,
+    string? Label = null)
 {
     public static ProviderSnapshot Of(ProviderId id, ProviderState state, string? detail = null) =>
         new(id, state, Detail: detail);

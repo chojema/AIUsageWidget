@@ -22,7 +22,8 @@ public sealed class AppController : IDisposable, ISettingsHost
     private readonly Application _app;
     private readonly IClassicDesktopStyleApplicationLifetime _desktop;
     private readonly AppSettings _settings = AppSettings.Load();
-    private readonly List<IUsageProvider> _providers = [new CodexProvider(), new ClaudeProvider(), new AntigravityProvider()];
+    private readonly AntigravityProvider _antigravity;
+    private readonly List<IUsageProvider> _providers;
     private readonly PanelWindow _panel = new();
     private readonly DispatcherTimer _trackTimer;
     private readonly DispatcherTimer _clockTimer;
@@ -36,12 +37,15 @@ public sealed class AppController : IDisposable, ISettingsHost
     private string? _imeLabel;
     private bool _nativeStyleApplied;
     private bool _placingWidget;
+    private string _knownGroups = string.Empty;
 
     public AppController(Application app, IClassicDesktopStyleApplicationLifetime desktop)
     {
         _app = app;
         _desktop = desktop;
         _strings = Strings.For(_settings.Language);
+        _antigravity = new AntigravityProvider(_settings.AntigravityGroup);
+        _providers = [new CodexProvider(), new ClaudeProvider(), _antigravity];
         _trackTimer = new DispatcherTimer(TimeSpan.FromMilliseconds(OperatingSystem.IsMacOS() ? 250 : 150),
             DispatcherPriority.Background, (_, _) => Tick());
         _clockTimer = new DispatcherTimer(TimeSpan.FromSeconds(30), DispatcherPriority.Background, (_, _) => Render());
@@ -54,7 +58,7 @@ public sealed class AppController : IDisposable, ISettingsHost
         (_tracker, _imeReader) = CreatePlatformServices();
         foreach (IUsageProvider provider in _providers)
         {
-            provider.Changed += _ => Dispatcher.UIThread.Post(Render);
+            provider.Changed += _ => Dispatcher.UIThread.Post(OnProviderChanged);
             provider.Start();
         }
         BuildTray();
@@ -258,6 +262,18 @@ public sealed class AppController : IDisposable, ISettingsHost
         _settings.Save();
     }
 
+    private void OnProviderChanged()
+    {
+        Render();
+        // The settings window lists Antigravity groups; rebuild it when the list first arrives or changes.
+        string groups = string.Join('\n', _antigravity.GroupNames);
+        if (groups != _knownGroups)
+        {
+            _knownGroups = groups;
+            _settingsWindow?.Build();
+        }
+    }
+
     private void Render()
     {
         _panel.Render(_providers.Select(p => p.Current), _strings, DateTimeOffset.Now);
@@ -319,6 +335,17 @@ public sealed class AppController : IDisposable, ISettingsHost
         _strings = Strings.For(code);
         BuildTray();
         Render();
+    }
+
+    public IReadOnlyList<string> AntigravityGroups => _antigravity.GroupNames;
+
+    public string? AntigravityShownGroup => _antigravity.ShownGroup;
+
+    public void SetAntigravityGroup(string group)
+    {
+        _settings.AntigravityGroup = group;
+        _settings.Save();
+        _antigravity.SelectGroup(group);
     }
 
     public string? SetClaudeConnected(bool connected)

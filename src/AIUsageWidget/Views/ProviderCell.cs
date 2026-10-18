@@ -4,6 +4,7 @@ using Avalonia.Layout;
 using Avalonia.Media;
 using AIUsageWidget.Core;
 using AIUsageWidget.Localization;
+using AIUsageWidget.Providers;
 
 namespace AIUsageWidget.Views;
 
@@ -20,6 +21,8 @@ public sealed class ProviderCell : Grid
     private static readonly IBrush Warn = new SolidColorBrush(Color.Parse("#F0B44C"));
     private static readonly IBrush Low = new SolidColorBrush(Color.Parse("#E86A5E"));
 
+    private readonly ProviderId _provider;
+    private readonly TextBlock _name;
     private readonly TextBlock _status;
     private readonly Row _fiveHour;
     private readonly Row _weekly;
@@ -29,8 +32,10 @@ public sealed class ProviderCell : Grid
         RowDefinitions = new RowDefinitions("Auto,Auto,Auto");
         VerticalAlignment = VerticalAlignment.Center;
 
+        _provider = provider;
         var title = new DockPanel();
-        title.Children.Add(Text(Strings.ProviderName(provider), Primary, FontWeight.SemiBold));
+        _name = Text(Strings.ProviderName(provider), Primary, FontWeight.SemiBold);
+        title.Children.Add(_name);
         _status = Text(string.Empty, Muted);
         _status.HorizontalAlignment = HorizontalAlignment.Right;
         _status.Margin = new Thickness(8, 0, 0, 0);
@@ -49,6 +54,10 @@ public sealed class ProviderCell : Grid
 
     public void Render(ProviderSnapshot snapshot, Strings s, DateTimeOffset now)
     {
+        _name.Text = snapshot.Label is { } label
+            ? $"{Strings.ProviderName(_provider)} · {AntigravityUsageParser.ShortName(label)}"
+            : Strings.ProviderName(_provider);
+
         if (snapshot.State != ProviderState.Ok)
         {
             _status.Text = string.Empty;

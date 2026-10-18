@@ -32,6 +32,9 @@ public sealed class AppSettings
     /// <summary>Shows the keyboard input state (for example EN or 한) at the right end of the panel.</summary>
     public bool ShowIme { get; set; } = true;
 
+    /// <summary>The Antigravity model group shown in the panel; null uses the default group.</summary>
+    public string? AntigravityGroup { get; set; }
+
     /// <summary>The status line configuration that existed before the Claude Code bridge was installed.</summary>
     public JsonObject? ClaudePreviousStatusLine { get; set; }
 

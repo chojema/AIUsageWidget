@@ -49,7 +49,8 @@ public static class CommandLocator
 
             info = new ProcessStartInfo(LoginShell);
             info.ArgumentList.Add("-lc");
-            info.ArgumentList.Add($"exec {command} {string.Join(' ', arguments)}");
+            // Quote every argument so the shell passes values such as "/usage" through unchanged.
+            info.ArgumentList.Add($"exec {command} {string.Join(' ', arguments.Select(PosixQuote))}");
         }
 
         info.UseShellExecute = false;
@@ -59,6 +60,8 @@ public static class CommandLocator
 
     public static bool Exists(string command) =>
         OperatingSystem.IsWindows() ? FindOnWindowsPath(command) is not null : ExistsInLoginShell(command);
+
+    internal static string PosixQuote(string value) => $"'{value.Replace("'", "'\\''")}'";
 
     private static string LoginShell =>
         Environment.GetEnvironmentVariable("SHELL") is { Length: > 0 } shell && File.Exists(shell) ? shell : "/bin/zsh";

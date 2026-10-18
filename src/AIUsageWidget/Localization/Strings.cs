@@ -51,6 +51,11 @@ public sealed class Strings
         general: "General",
         close: "Close",
         imeTitle: "Input",
+        antigravityHalted: "Stopped: unexpected CLI output",
+        antigravitySection: "Antigravity",
+        antigravityGroup: "Model group",
+        antigravityGroupHint: "Each group has its own 5-hour and weekly limits. The list comes from the CLI.",
+        antigravityGroupsPending: "Groups appear after the first successful read.",
         days: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]);
 
     public static Strings Korean { get; } = new(
@@ -98,6 +103,11 @@ public sealed class Strings
         general: "일반",
         close: "닫기",
         imeTitle: "입력",
+        antigravityHalted: "중지됨: CLI 출력이 예상과 다름",
+        antigravitySection: "Antigravity",
+        antigravityGroup: "모델 그룹",
+        antigravityGroupHint: "그룹마다 5시간 한도와 주간 한도가 따로 있습니다. 목록은 CLI에서 받아 옵니다.",
+        antigravityGroupsPending: "처음 한도를 읽은 뒤에 그룹 목록이 나타납니다.",
         days: ["일", "월", "화", "수", "목", "금", "토"]);
 
     private Strings(string code, string fiveHour, string weekly, string left, string resets, string resetsIn,
@@ -105,7 +115,7 @@ public sealed class Strings
         string notConnected, string waiting, string waitingClaude, string unsupported, string error, string starting,
         string menuLanguage, string menuSystemLanguage, string menuConnectClaude, string menuDisconnectClaude,
         string menuStartAtLogin, string menuRefresh, string menuOpenProject, string menuQuit,
-        string claudeConnectFailed, string menuSettings, string settingsTitle, string displayMode, string modeTerminal, string modeTerminalHint, string modeWidget, string modeWidgetHint, string widgetTopmost, string showIme, string claudeSection, string claudeConnected, string claudeDisconnected, string connect, string disconnect, string general, string close, string imeTitle, string[] days)
+        string claudeConnectFailed, string menuSettings, string settingsTitle, string displayMode, string modeTerminal, string modeTerminalHint, string modeWidget, string modeWidgetHint, string widgetTopmost, string showIme, string claudeSection, string claudeConnected, string claudeDisconnected, string connect, string disconnect, string general, string close, string imeTitle, string antigravityHalted, string antigravitySection, string antigravityGroup, string antigravityGroupHint, string antigravityGroupsPending, string[] days)
     {
         Code = code;
         FiveHour = fiveHour;
@@ -151,6 +161,11 @@ public sealed class Strings
         General = general;
         Close = close;
         ImeTitle = imeTitle;
+        AntigravityHalted = antigravityHalted;
+        AntigravitySection = antigravitySection;
+        AntigravityGroup = antigravityGroup;
+        AntigravityGroupHint = antigravityGroupHint;
+        AntigravityGroupsPending = antigravityGroupsPending;
         Days = days;
     }
 
@@ -198,6 +213,11 @@ public sealed class Strings
     public string General { get; }
     public string Close { get; }
     public string ImeTitle { get; }
+    public string AntigravityHalted { get; }
+    public string AntigravitySection { get; }
+    public string AntigravityGroup { get; }
+    public string AntigravityGroupHint { get; }
+    public string AntigravityGroupsPending { get; }
     public string[] Days { get; }
 
     /// <summary>Resolves a setting value ("system", "en", "ko") to a string table.</summary>
@@ -223,7 +243,7 @@ public sealed class Strings
         ProviderState.NotConnected => NotConnected,
         ProviderState.WaitingForData => snapshot.Provider == ProviderId.ClaudeCode ? WaitingClaude : Waiting,
         ProviderState.Unsupported => Unsupported,
-        ProviderState.Error => Error,
+        ProviderState.Error => snapshot.Detail == "unexpected-output" ? AntigravityHalted : Error,
         ProviderState.Starting => Starting,
         _ => string.Empty,
     };
