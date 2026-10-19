@@ -47,6 +47,10 @@ public static class ClaudeShell
         }
         info.UseShellExecute = false;
         info.CreateNoWindow = true;
+        if (OperatingSystem.IsWindows())
+        {
+            info.WindowStyle = ProcessWindowStyle.Hidden;
+        }
         return info;
     }
 

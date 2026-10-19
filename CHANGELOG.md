@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.0.11 — 2026-10-19
+
+- On Windows, attach only after the same terminal stays in front for one second. Brief background terminals no longer immediately show the panel; switching terminals starts a fresh delay.
+- Apply non-activating window styles before showing the panel, and strengthen hidden startup for chained status line commands.
+- Windows x64 download. Existing macOS downloads remain at 0.0.10.
+
 ## 0.0.10 — 2026-10-19
 
 - Right-click the panel for Settings, Refresh now, Hide panel, and Quit program. The panel stays visible while its menu is open.

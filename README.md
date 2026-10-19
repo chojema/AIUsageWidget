@@ -10,11 +10,11 @@ See your Codex, Claude Code and Antigravity usage limits below your terminal or 
 
 ## Download and install
 
-[**Download 0.0.10**](https://github.com/chojema/AIUsageWidget/releases/tag/v0.0.10)
+[**Download 0.0.11**](https://github.com/chojema/AIUsageWidget/releases/tag/v0.0.11)
 
 | Platform | File |
 |---|---|
-| Windows x64 | [AIUsageWidget-0.0.10-win-x64.zip](https://github.com/chojema/AIUsageWidget/releases/download/v0.0.10/AIUsageWidget-0.0.10-win-x64.zip) |
+| Windows x64 | [AIUsageWidget-0.0.11-win-x64.zip](https://github.com/chojema/AIUsageWidget/releases/download/v0.0.11/AIUsageWidget-0.0.11-win-x64.zip) |
 | macOS Apple Silicon (M-series) | [AIUsageWidget-0.0.10-osx-arm64.zip](https://github.com/chojema/AIUsageWidget/releases/download/v0.0.10/AIUsageWidget-0.0.10-osx-arm64.zip) |
 | macOS Intel | [AIUsageWidget-0.0.10-osx-x64.zip](https://github.com/chojema/AIUsageWidget/releases/download/v0.0.10/AIUsageWidget-0.0.10-osx-x64.zip) |
 
@@ -38,6 +38,8 @@ No separate .NET installation is needed. Windows may show a SmartScreen warning 
 | **Standalone widget** | Drag anywhere, with an optional always-on-top setting. |
 
 Supported terminals include Windows Terminal, Terminal, iTerm2, WezTerm, Alacritty, Ghostty and Warp. The panel follows windows, not individual tabs.
+
+On Windows, the terminal must stay in front for one second before the panel appears. Switching terminals starts a fresh delay.
 
 Use **↻** to refresh and **✕** to hide the panel or quit. Restore a hidden panel with **Show panel** in the tray/menu bar menu. Appearance, language, refresh and close behavior are available in **Settings**. Start at login is available on Windows only.
 

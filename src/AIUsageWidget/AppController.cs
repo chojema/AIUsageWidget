@@ -41,6 +41,7 @@ public sealed class AppController : IDisposable, ISettingsHost
     private bool _placingWidget;
     private string _knownGroups = string.Empty;
     private bool _hiddenByUser;
+    private readonly ForegroundStability _terminalStability = new();
 
     public AppController(Application app, IClassicDesktopStyleApplicationLifetime desktop)
     {
@@ -107,6 +108,7 @@ public sealed class AppController : IDisposable, ISettingsHost
     {
         if (_hiddenByUser)
         {
+            _terminalStability.Reset();
             return;
         }
 
@@ -117,8 +119,16 @@ public sealed class AppController : IDisposable, ISettingsHost
         }
         catch (Exception ex) when (ex is DllNotFoundException or EntryPointNotFoundException)
         {
+            (_tracker as IDisposable)?.Dispose();
             _tracker = null;
             info = ForegroundInfo.Other;
+        }
+
+        if (OperatingSystem.IsWindows() && _settings.DisplayMode == DisplayMode.Terminal &&
+            !_terminalStability.IsReady(info) && info.Kind == ForegroundKind.Terminal)
+        {
+            HidePanel();
+            return;
         }
 
         if (info.Kind != ForegroundKind.Self &&
@@ -135,7 +145,7 @@ public sealed class AppController : IDisposable, ISettingsHost
         switch (info.Kind)
         {
             case ForegroundKind.Terminal:
-                ShowAttached(PanelPlacement.Compute(info.Terminal!), info.Terminal!.Scale);
+                ShowAttached(info.Terminal!);
                 break;
             case ForegroundKind.Other:
                 if (!_panel.IsContextMenuOpen)
@@ -175,6 +185,7 @@ public sealed class AppController : IDisposable, ISettingsHost
 
     private void ApplyDisplayMode()
     {
+        _terminalStability.Reset();
         _placed = null;
         if (_hiddenByUser)
         {
@@ -217,6 +228,7 @@ public sealed class AppController : IDisposable, ISettingsHost
         if (!_panel.IsVisible)
         {
             Render(beforeShow: true);
+            ApplyNativeStyle();
             _panel.Show();
         }
         ApplyNativeStyle();
@@ -224,9 +236,23 @@ public sealed class AppController : IDisposable, ISettingsHost
         _placingWidget = false;
     }
 
-    private void ShowAttached(ScreenRect rect, double scale)
+    private void ShowAttached(TerminalWindow terminal)
     {
         bool wasHidden = !_panel.IsVisible;
+        if (wasHidden)
+        {
+            Render(beforeShow: true);
+        }
+        // Recheck after IME/render work, immediately before showing or moving the panel.
+        if (OperatingSystem.IsWindows() && _tracker is WindowsForegroundTracker windows &&
+            !windows.IsCurrent(terminal))
+        {
+            _terminalStability.Reset();
+            HidePanel();
+            return;
+        }
+        ScreenRect rect = PanelPlacement.Compute(terminal);
+        double scale = terminal.Scale;
         if (!wasHidden && _placed == rect)
         {
             return;
@@ -237,7 +263,7 @@ public sealed class AppController : IDisposable, ISettingsHost
         _panel.Height = rect.Height / scale;
         if (wasHidden)
         {
-            Render(beforeShow: true);
+            ApplyNativeStyle();
             _panel.Show();
         }
 
@@ -611,6 +637,7 @@ public sealed class AppController : IDisposable, ISettingsHost
         _trackTimer.Stop();
         _clockTimer.Stop();
         _secondTimer.Stop();
+        (_tracker as IDisposable)?.Dispose();
         if (_saveWidgetTimer.IsEnabled)
         {
             SaveWidgetPosition();

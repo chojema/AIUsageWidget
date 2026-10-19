@@ -6,19 +6,31 @@ using AIUsageWidget.Tracking;
 namespace AIUsageWidget.Platform.Windows;
 
 [SupportedOSPlatform("windows")]
-public sealed class WindowsForegroundTracker : IForegroundTracker
+public sealed class WindowsForegroundTracker : IForegroundTracker, IDisposable
 {
     private readonly HashSet<string> _extraProcesses;
     private readonly Dictionary<uint, string> _processNames = new();
     private readonly uint _ownProcessId = (uint)Environment.ProcessId;
+    private readonly Win32.WinEventProc _foregroundChanged;
+    private nint _hook;
+    private long _generation;
 
     public WindowsForegroundTracker(IEnumerable<string> extraProcesses)
     {
         _extraProcesses = new HashSet<string>(extraProcesses, StringComparer.OrdinalIgnoreCase);
+        // Created on the UI thread: out-of-context callbacks use its message loop.
+        // Include our own events so settings/menu activation also breaks continuity.
+        _foregroundChanged = (_, _, _, _, _, _, _) => _generation++;
+        _hook = Win32.SetWinEventHook(Win32.EVENT_SYSTEM_FOREGROUND, Win32.EVENT_SYSTEM_FOREGROUND,
+            0, _foregroundChanged, 0, 0, 0);
     }
 
     public ForegroundInfo Poll()
     {
+        if (_hook == 0)
+        {
+            return ForegroundInfo.Other; // Do not attach without foreground continuity tracking.
+        }
         nint hwnd = Win32.GetForegroundWindow();
         if (hwnd == 0)
         {
@@ -50,7 +62,25 @@ public sealed class WindowsForegroundTracker : IForegroundTracker
 
         uint dpi = Win32.GetDpiForWindow(hwnd);
         double scale = dpi > 0 ? dpi / 96.0 : 1.0;
-        return new ForegroundInfo(ForegroundKind.Terminal, new TerminalWindow(bounds, ToRect(info.rcWork), scale));
+        return new ForegroundInfo(ForegroundKind.Terminal, new TerminalWindow(bounds, ToRect(info.rcWork), scale)
+        {
+            Handle = hwnd, ProcessId = pid, ForegroundGeneration = _generation,
+        });
+    }
+
+    public bool IsCurrent(TerminalWindow terminal) =>
+        Poll() is { Kind: ForegroundKind.Terminal, Terminal: { } current } &&
+        current.Handle == terminal.Handle && current.ProcessId == terminal.ProcessId &&
+        current.ForegroundGeneration == terminal.ForegroundGeneration;
+
+    public void Dispose()
+    {
+        if (_hook != 0)
+        {
+            Win32.UnhookWinEvent(_hook);
+            _hook = 0;
+        }
+        GC.KeepAlive(_foregroundChanged);
     }
 
     private bool IsTerminal(nint hwnd, uint pid)

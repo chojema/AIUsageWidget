@@ -10,11 +10,11 @@
 
 ## 다운로드 및 설치
 
-[**0.0.10 다운로드**](https://github.com/chojema/AIUsageWidget/releases/tag/v0.0.10)
+[**0.0.11 다운로드**](https://github.com/chojema/AIUsageWidget/releases/tag/v0.0.11)
 
 | 플랫폼 | 파일 |
 |---|---|
-| Windows x64 | [AIUsageWidget-0.0.10-win-x64.zip](https://github.com/chojema/AIUsageWidget/releases/download/v0.0.10/AIUsageWidget-0.0.10-win-x64.zip) |
+| Windows x64 | [AIUsageWidget-0.0.11-win-x64.zip](https://github.com/chojema/AIUsageWidget/releases/download/v0.0.11/AIUsageWidget-0.0.11-win-x64.zip) |
 | macOS Apple Silicon(M 시리즈) | [AIUsageWidget-0.0.10-osx-arm64.zip](https://github.com/chojema/AIUsageWidget/releases/download/v0.0.10/AIUsageWidget-0.0.10-osx-arm64.zip) |
 | macOS Intel | [AIUsageWidget-0.0.10-osx-x64.zip](https://github.com/chojema/AIUsageWidget/releases/download/v0.0.10/AIUsageWidget-0.0.10-osx-x64.zip) |
 
@@ -38,6 +38,8 @@
 | **독립 위젯** | 원하는 곳으로 옮길 수 있고, 항상 위에 표시하도록 설정할 수 있습니다. |
 
 Windows Terminal, Terminal, iTerm2, WezTerm, Alacritty, Ghostty, Warp 등을 지원합니다. 보조창은 개별 탭이 아닌 창을 따라갑니다.
+
+Windows에서는 터미널이 1초 동안 전면 상태를 유지한 뒤 보조창을 표시합니다. 다른 터미널로 전환하면 대기 시간을 다시 계산합니다.
 
 **↻**로 새로 고치고 **✕**로 보조창을 숨기거나 앱을 종료합니다. 숨긴 보조창은 트레이·메뉴 막대 메뉴의 **보조창 다시 표시**로 복원합니다. 표시 항목, 언어, 갱신 및 닫기 동작은 **설정**에서 바꿉니다. 로그인 시 자동 실행은 Windows에서만 지원합니다.
 

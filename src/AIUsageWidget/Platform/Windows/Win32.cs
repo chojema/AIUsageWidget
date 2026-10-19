@@ -19,6 +19,18 @@ internal static partial class Win32
     public const int DWMWA_EXTENDED_FRAME_BOUNDS = 9;
     public const int DWMWA_CLOAKED = 14;
 
+    public const uint EVENT_SYSTEM_FOREGROUND = 3;
+    [UnmanagedFunctionPointer(CallingConvention.Winapi)]
+    public delegate void WinEventProc(nint hook, uint kind, nint hwnd, int objectId, int childId, uint thread, uint time);
+
+    [DllImport("user32.dll")]
+    public static extern nint SetWinEventHook(uint min, uint max, nint module, WinEventProc callback,
+        uint process, uint thread, uint flags);
+
+    [LibraryImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static partial bool UnhookWinEvent(nint hook);
+
     [StructLayout(LayoutKind.Sequential)]
     public struct RECT
     {

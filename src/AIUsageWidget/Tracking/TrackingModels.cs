@@ -8,7 +8,13 @@ public readonly record struct ScreenRect(int X, int Y, int Width, int Height)
 }
 
 /// <summary>The frontmost terminal window and the screen it is on.</summary>
-public sealed record TerminalWindow(ScreenRect Bounds, ScreenRect WorkArea, double Scale);
+public sealed record TerminalWindow(ScreenRect Bounds, ScreenRect WorkArea, double Scale)
+{
+    // Windows identity and activation generation distinguish windows even at identical bounds.
+    public nint Handle { get; init; }
+    public uint ProcessId { get; init; }
+    public long ForegroundGeneration { get; init; }
+}
 
 public enum ForegroundKind
 {
