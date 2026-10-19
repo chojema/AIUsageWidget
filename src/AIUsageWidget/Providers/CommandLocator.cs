@@ -50,7 +50,7 @@ public static class CommandLocator
             info = new ProcessStartInfo(LoginShell);
             info.ArgumentList.Add("-lc");
             // Quote every argument so the shell passes values such as "/usage" through unchanged.
-            info.ArgumentList.Add($"exec {command} {string.Join(' ', arguments.Select(PosixQuote))}");
+            info.ArgumentList.Add($"{ShellPathSetup}exec {command} {string.Join(' ', arguments.Select(PosixQuote))}");
         }
 
         info.UseShellExecute = false;
@@ -69,6 +69,34 @@ public static class CommandLocator
 
     private static string LoginShell =>
         Environment.GetEnvironmentVariable("SHELL") is { Length: > 0 } shell && File.Exists(shell) ? shell : "/bin/zsh";
+
+    /// <summary>
+    /// A non-interactive login shell skips files such as ~/.zshrc, where installers often add
+    /// ~/.local/bin or npm folders. Append the common install folders that exist so those CLIs are found.
+    /// </summary>
+    private static string ShellPathSetup => BuildPathSetup(
+        CommonInstallDirectories(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile))
+            .Where(Directory.Exists));
+
+    internal static string BuildPathSetup(IEnumerable<string> directories)
+    {
+        string joined = string.Join(':', directories.Where(dir => !dir.Contains(':')).Select(PosixQuote));
+        return joined.Length == 0 ? string.Empty : $"export PATH=\"$PATH\":{joined}; ";
+    }
+
+    internal static IEnumerable<string> CommonInstallDirectories(string home)
+    {
+        if (home.Length > 0)
+        {
+            yield return Path.Combine(home, ".local", "bin");
+            yield return Path.Combine(home, "bin");
+            yield return Path.Combine(home, ".npm-global", "bin");
+            yield return Path.Combine(home, ".bun", "bin");
+            yield return Path.Combine(home, ".volta", "bin");
+        }
+        yield return "/opt/homebrew/bin";
+        yield return "/usr/local/bin";
+    }
 
     internal static string? FindOnWindowsPath(string command)
     {
@@ -110,7 +138,7 @@ public static class CommandLocator
                 RedirectStandardError = true,
             };
             info.ArgumentList.Add("-lc");
-            info.ArgumentList.Add($"command -v {command}");
+            info.ArgumentList.Add($"{ShellPathSetup}command -v {command}");
             using var process = Process.Start(info);
             if (process is null)
             {

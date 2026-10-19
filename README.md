@@ -10,13 +10,13 @@ See your Codex, Claude Code and Antigravity usage limits below your terminal or 
 
 ## Download and install
 
-[**Download 0.0.11**](https://github.com/chojema/AIUsageWidget/releases/tag/v0.0.11)
+[**Download 0.0.12**](https://github.com/chojema/AIUsageWidget/releases/tag/v0.0.12)
 
 | Platform | File |
 |---|---|
 | Windows x64 | [AIUsageWidget-0.0.11-win-x64.zip](https://github.com/chojema/AIUsageWidget/releases/download/v0.0.11/AIUsageWidget-0.0.11-win-x64.zip) |
-| macOS Apple Silicon (M-series) | [AIUsageWidget-0.0.11-osx-arm64.zip](https://github.com/chojema/AIUsageWidget/releases/download/v0.0.11/AIUsageWidget-0.0.11-osx-arm64.zip) |
-| macOS Intel | [AIUsageWidget-0.0.11-osx-x64.zip](https://github.com/chojema/AIUsageWidget/releases/download/v0.0.11/AIUsageWidget-0.0.11-osx-x64.zip) |
+| macOS Apple Silicon (M-series) | [AIUsageWidget-0.0.12-osx-arm64.zip](https://github.com/chojema/AIUsageWidget/releases/download/v0.0.12/AIUsageWidget-0.0.12-osx-arm64.zip) |
+| macOS Intel | [AIUsageWidget-0.0.12-osx-x64.zip](https://github.com/chojema/AIUsageWidget/releases/download/v0.0.12/AIUsageWidget-0.0.12-osx-x64.zip) |
 
 - **Windows:** extract to a permanent folder and run `AIUsageWidget.exe`. Right-click the panel or use the tray menu for Settings, refresh, hide, and quit.
 - **macOS 14+:** extract, move `AIUsageWidget.app` to `/Applications`, and open it. Open Settings from the menu bar icon; the app has no Dock icon.

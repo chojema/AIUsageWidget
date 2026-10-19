@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.0.12 — 2026-10-19
+
+- On macOS, find Codex and Antigravity CLIs installed in common folders such as `~/.local/bin`, even when that folder is added to `PATH` only in `~/.zshrc`. Previously they could show as not installed when the app was opened from Finder.
+- macOS Apple Silicon / Intel downloads only. Windows is unchanged; keep using 0.0.11.
+
 ## 0.0.11 — 2026-10-19
 
 - On Windows, attach only after the same terminal stays in front for one second. Brief background terminals no longer immediately show the panel; switching terminals starts a fresh delay.

@@ -98,4 +98,21 @@ public class AntigravityUsageParserTests
         Assert.Equal("'/usage'", CommandLocator.PosixQuote("/usage"));
         Assert.Equal("'it'\\''s'", CommandLocator.PosixQuote("it's"));
     }
+
+    [Fact]
+    public void Path_setup_appends_quoted_directories_after_the_login_path()
+    {
+        Assert.Equal(
+            "export PATH=\"$PATH\":'/Users/me/.local/bin':'/opt/homebrew/bin'; ",
+            CommandLocator.BuildPathSetup(["/Users/me/.local/bin", "/opt/homebrew/bin"]));
+        Assert.Equal(string.Empty, CommandLocator.BuildPathSetup([]));
+        Assert.Equal(string.Empty, CommandLocator.BuildPathSetup(["/bad:dir"]));
+    }
+
+    [Fact]
+    public void Common_install_directories_include_the_user_local_bin()
+    {
+        Assert.Contains(Path.Combine("/Users/me", ".local", "bin"), CommandLocator.CommonInstallDirectories("/Users/me"));
+        Assert.DoesNotContain(CommandLocator.CommonInstallDirectories(""), dir => dir.StartsWith(".", StringComparison.Ordinal));
+    }
 }
