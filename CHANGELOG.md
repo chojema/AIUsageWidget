@@ -5,7 +5,7 @@
 - Right-click the panel for Settings, Refresh now, Hide panel, and Quit program. The panel stays visible while its menu is open.
 - Skip screen updates and unrelated keyboard input checks while the attached panel is hidden, then show the latest usage when returning to the terminal.
 - Strengthen hidden startup for Windows CLI queries.
-- Windows x64 release; macOS downloads remain at 0.0.9.
+- Windows x64 and macOS Apple Silicon / Intel downloads.
 
 ## 0.0.9 — 2026-10-18
 
