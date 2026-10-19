@@ -34,6 +34,10 @@ public sealed partial class PanelWindow : Window
     private readonly Button _quitButton;
     private readonly Button _cancelButton;
     private readonly DispatcherTimer _promptTimer;
+    private readonly MenuItem _settingsMenuItem = new();
+    private readonly MenuItem _refreshMenuItem = new();
+    private readonly MenuItem _hideMenuItem = new();
+    private readonly MenuItem _quitMenuItem = new();
 
     public PanelWindow()
     {
@@ -72,8 +76,25 @@ public sealed partial class PanelWindow : Window
         };
         _cancelButton.Click += (_, _) => HideClosePrompt();
 
+        ContextMenu = new ContextMenu
+        {
+            ItemsSource = new Control[]
+            {
+                _settingsMenuItem, _refreshMenuItem, new Separator(), _hideMenuItem, _quitMenuItem,
+            },
+        };
+        ContextMenu.Opening += (_, _) => HideClosePrompt();
+        _settingsMenuItem.Click += (_, _) => InvokeMenuAction(() => SettingsClicked?.Invoke());
+        _refreshMenuItem.Click += (_, _) => InvokeMenuAction(() => RefreshClicked?.Invoke());
+        _hideMenuItem.Click += (_, _) => InvokeMenuAction(() => HidePanelChosen?.Invoke());
+        _quitMenuItem.Click += (_, _) => InvokeMenuAction(() => QuitChosen?.Invoke());
+
         PointerPressed += OnPointerPressed;
     }
+
+    public event Action? SettingsClicked;
+
+    public bool IsContextMenuOpen => ContextMenu?.IsOpen == true;
 
     /// <summary>The ✕ button was clicked.</summary>
     public event Action? CloseClicked;
@@ -157,6 +178,10 @@ public sealed partial class PanelWindow : Window
         _hideButton.Content = strings.CloseHideButton;
         _quitButton.Content = strings.CloseQuitButton;
         _cancelButton.Content = strings.Cancel;
+        _settingsMenuItem.Header = strings.MenuSettings;
+        _refreshMenuItem.Header = strings.MenuRefresh;
+        _hideMenuItem.Header = strings.MenuHidePanel;
+        _quitMenuItem.Header = strings.CloseQuitButton;
     }
 
     public void RenderClock(DateTimeOffset now, Strings strings, bool seconds)
@@ -182,6 +207,13 @@ public sealed partial class PanelWindow : Window
     {
         _promptTimer.Stop();
         _closePrompt.IsVisible = false;
+    }
+
+    private void InvokeMenuAction(Action action)
+    {
+        ContextMenu?.Close();
+        HideClosePrompt();
+        action();
     }
 
     private void OnPointerPressed(object? sender, PointerPressedEventArgs e)

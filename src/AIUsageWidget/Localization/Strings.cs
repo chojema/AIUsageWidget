@@ -352,6 +352,7 @@ public sealed class Strings
     public string CloseQuitButton { get; }
     public string Cancel { get; }
     public string MenuShowPanel { get; }
+    public string MenuHidePanel => Code == "ko" ? "보조창 숨기기" : "Hide panel";
     public string CloseTooltip { get; }
     public string Used { get; }
     public string SectionsHeading { get; }

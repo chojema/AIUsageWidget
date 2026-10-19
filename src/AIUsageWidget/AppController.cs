@@ -56,6 +56,7 @@ public sealed class AppController : IDisposable, ISettingsHost
         _saveWidgetTimer = new DispatcherTimer(TimeSpan.FromMilliseconds(600), DispatcherPriority.Background, (_, _) => SaveWidgetPosition());
         _secondTimer = new DispatcherTimer(TimeSpan.FromSeconds(1), DispatcherPriority.Background, (_, _) => RenderClock());
         _panel.PositionChanged += (_, _) => OnPanelMoved();
+        _panel.SettingsClicked += OpenSettings;
         _panel.RefreshClicked += RefreshAll;
         _panel.CloseClicked += OnCloseClicked;
         _panel.HidePanelChosen += HideByUser;
@@ -104,6 +105,11 @@ public sealed class AppController : IDisposable, ISettingsHost
 
     private void Tick()
     {
+        if (_hiddenByUser)
+        {
+            return;
+        }
+
         ForegroundInfo info;
         try
         {
@@ -115,14 +121,15 @@ public sealed class AppController : IDisposable, ISettingsHost
             info = ForegroundInfo.Other;
         }
 
-        if (info.Kind != ForegroundKind.Self)
+        if (info.Kind != ForegroundKind.Self &&
+            (_settings.DisplayMode == DisplayMode.Widget || info.Kind == ForegroundKind.Terminal))
         {
             UpdateIme();
         }
 
-        if (_hiddenByUser || _settings.DisplayMode == DisplayMode.Widget)
+        if (_settings.DisplayMode == DisplayMode.Widget)
         {
-            return; // Hidden on request, or a widget that stays where the user put it.
+            return; // A widget stays where the user put it.
         }
 
         switch (info.Kind)
@@ -131,7 +138,10 @@ public sealed class AppController : IDisposable, ISettingsHost
                 ShowAttached(PanelPlacement.Compute(info.Terminal!), info.Terminal!.Scale);
                 break;
             case ForegroundKind.Other:
-                HidePanel();
+                if (!_panel.IsContextMenuOpen)
+                {
+                    HidePanel();
+                }
                 break;
             case ForegroundKind.Self:
                 break; // Keep the current state while the tray menu or settings window is active.
@@ -206,7 +216,7 @@ public sealed class AppController : IDisposable, ISettingsHost
         _panel.Topmost = _settings.WidgetTopmost;
         if (!_panel.IsVisible)
         {
-            Render();
+            Render(beforeShow: true);
             _panel.Show();
         }
         ApplyNativeStyle();
@@ -227,7 +237,7 @@ public sealed class AppController : IDisposable, ISettingsHost
         _panel.Height = rect.Height / scale;
         if (wasHidden)
         {
-            Render();
+            Render(beforeShow: true);
             _panel.Show();
         }
 
@@ -256,6 +266,7 @@ public sealed class AppController : IDisposable, ISettingsHost
 
     private void HidePanel()
     {
+        _panel.ContextMenu?.Close();
         if (_panel.IsVisible)
         {
             _panel.Hide();
@@ -296,14 +307,24 @@ public sealed class AppController : IDisposable, ISettingsHost
 
     private double WidgetWidthDip => PanelPlacement.WidgetWidthFor(VisibleSections, _settings.ShowSeconds);
 
-    private void Render()
+    private void Render(bool beforeShow = false)
     {
+        if (!_panel.IsVisible && !beforeShow)
+        {
+            return; // Keep collecting data without updating a hidden window.
+        }
         _panel.Render(_providers.Select(p => p.Current), _strings, DateTimeOffset.Now, _settings.UsageDisplay);
         _panel.RenderIme(_imeLabel, _strings);
-        RenderClock();
+        RenderClock(beforeShow);
     }
 
-    private void RenderClock() => _panel.RenderClock(DateTimeOffset.Now, _strings, _settings.ShowSeconds);
+    private void RenderClock(bool beforeShow = false)
+    {
+        if (_panel.IsVisible || beforeShow)
+        {
+            _panel.RenderClock(DateTimeOffset.Now, _strings, _settings.ShowSeconds);
+        }
+    }
 
     /// <summary>Saves the section list and lays the panel out again.</summary>
     private void ApplySections()
