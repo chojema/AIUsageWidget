@@ -15,8 +15,8 @@
 | 플랫폼 | 파일 |
 |---|---|
 | Windows x64 | [AIUsageWidget-0.0.11-win-x64.zip](https://github.com/chojema/AIUsageWidget/releases/download/v0.0.11/AIUsageWidget-0.0.11-win-x64.zip) |
-| macOS Apple Silicon(M 시리즈) | [AIUsageWidget-0.0.10-osx-arm64.zip](https://github.com/chojema/AIUsageWidget/releases/download/v0.0.10/AIUsageWidget-0.0.10-osx-arm64.zip) |
-| macOS Intel | [AIUsageWidget-0.0.10-osx-x64.zip](https://github.com/chojema/AIUsageWidget/releases/download/v0.0.10/AIUsageWidget-0.0.10-osx-x64.zip) |
+| macOS Apple Silicon(M 시리즈) | [AIUsageWidget-0.0.11-osx-arm64.zip](https://github.com/chojema/AIUsageWidget/releases/download/v0.0.11/AIUsageWidget-0.0.11-osx-arm64.zip) |
+| macOS Intel | [AIUsageWidget-0.0.11-osx-x64.zip](https://github.com/chojema/AIUsageWidget/releases/download/v0.0.11/AIUsageWidget-0.0.11-osx-x64.zip) |
 
 - **Windows:** 계속 사용할 폴더에 압축을 풀고 `AIUsageWidget.exe`를 실행합니다. 보조창 우클릭 메뉴 또는 트레이 메뉴에서 설정, 새로 고침, 숨기기, 종료를 선택합니다.
 - **macOS 14 이상:** 압축을 풀고 `AIUsageWidget.app`을 `/Applications`로 옮겨 실행합니다. 메뉴 막대 아이콘에서 설정을 엽니다. Dock 아이콘은 없습니다.

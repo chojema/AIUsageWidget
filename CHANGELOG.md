@@ -4,7 +4,7 @@
 
 - On Windows, attach only after the same terminal stays in front for one second. Brief background terminals no longer immediately show the panel; switching terminals starts a fresh delay.
 - Apply non-activating window styles before showing the panel, and strengthen hidden startup for chained status line commands.
-- Windows x64 download. Existing macOS downloads remain at 0.0.10.
+- Windows x64 and macOS Apple Silicon / Intel downloads.
 
 ## 0.0.10 — 2026-10-19
 
