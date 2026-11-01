@@ -10,11 +10,11 @@
 
 ## 다운로드 및 설치
 
-[**0.0.12 다운로드**](https://github.com/chojema/AIUsageWidget/releases/tag/v0.0.12)
+[**0.0.13 다운로드**](https://github.com/chojema/AIUsageWidget/releases/tag/v0.0.13)
 
 | 플랫폼 | 파일 |
 |---|---|
-| Windows x64 | [AIUsageWidget-0.0.11-win-x64.zip](https://github.com/chojema/AIUsageWidget/releases/download/v0.0.11/AIUsageWidget-0.0.11-win-x64.zip) |
+| Windows x64 | [AIUsageWidget-0.0.13-win-x64.zip](https://github.com/chojema/AIUsageWidget/releases/download/v0.0.13/AIUsageWidget-0.0.13-win-x64.zip) |
 | macOS Apple Silicon(M 시리즈) | [AIUsageWidget-0.0.12-osx-arm64.zip](https://github.com/chojema/AIUsageWidget/releases/download/v0.0.12/AIUsageWidget-0.0.12-osx-arm64.zip) |
 | macOS Intel | [AIUsageWidget-0.0.12-osx-x64.zip](https://github.com/chojema/AIUsageWidget/releases/download/v0.0.12/AIUsageWidget-0.0.12-osx-x64.zip) |
 

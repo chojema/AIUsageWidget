@@ -10,11 +10,11 @@ See your Codex, Claude Code and Antigravity usage limits below your terminal or 
 
 ## Download and install
 
-[**Download 0.0.12**](https://github.com/chojema/AIUsageWidget/releases/tag/v0.0.12)
+[**Download 0.0.13**](https://github.com/chojema/AIUsageWidget/releases/tag/v0.0.13)
 
 | Platform | File |
 |---|---|
-| Windows x64 | [AIUsageWidget-0.0.11-win-x64.zip](https://github.com/chojema/AIUsageWidget/releases/download/v0.0.11/AIUsageWidget-0.0.11-win-x64.zip) |
+| Windows x64 | [AIUsageWidget-0.0.13-win-x64.zip](https://github.com/chojema/AIUsageWidget/releases/download/v0.0.13/AIUsageWidget-0.0.13-win-x64.zip) |
 | macOS Apple Silicon (M-series) | [AIUsageWidget-0.0.12-osx-arm64.zip](https://github.com/chojema/AIUsageWidget/releases/download/v0.0.12/AIUsageWidget-0.0.12-osx-arm64.zip) |
 | macOS Intel | [AIUsageWidget-0.0.12-osx-x64.zip](https://github.com/chojema/AIUsageWidget/releases/download/v0.0.12/AIUsageWidget-0.0.12-osx-x64.zip) |
 

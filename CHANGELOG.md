@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.0.13 — 2026-11-01
+
+- On Windows, stop terminal windows from briefly opening and taking keyboard focus. The Antigravity CLI's background updater caused them when the widget checked usage.
+- The widget now keeps the Antigravity CLI up to date itself without showing a window, when it starts and every 24 hours.
+- Windows x64 download only. macOS is unchanged; keep using 0.0.12.
+
 ## 0.0.12 — 2026-10-19
 
 - On macOS, find Codex and Antigravity CLIs installed in common folders such as `~/.local/bin`, even when that folder is added to `PATH` only in `~/.zshrc`. Previously they could show as not installed when the app was opened from Finder.
