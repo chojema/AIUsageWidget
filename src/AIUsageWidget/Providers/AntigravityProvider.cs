@@ -15,6 +15,8 @@ public sealed class AntigravityProvider : IUsageProvider
     private static readonly TimeSpan SignedOutRetry = TimeSpan.FromMinutes(30);
     private static readonly TimeSpan MissingCliRetry = TimeSpan.FromMinutes(10);
     private static readonly TimeSpan RunTimeout = TimeSpan.FromSeconds(60);
+    private static readonly TimeSpan UpdateTimeout = TimeSpan.FromMinutes(10);
+    private static readonly TimeSpan UpdateInterval = TimeSpan.FromHours(24);
 
     private readonly CancellationTokenSource _stop = new();
     private readonly SemaphoreSlim _refresh = new(0);
@@ -24,6 +26,7 @@ public sealed class AntigravityProvider : IUsageProvider
     private DateTimeOffset? _updatedAt;
     private string? _selectedGroup;
     private bool _halted;
+    private DateTimeOffset? _lastUpdate;
 
     public AntigravityProvider(string? selectedGroup)
     {
@@ -109,11 +112,12 @@ public sealed class AntigravityProvider : IUsageProvider
                 await Wait(MissingCliRetry, token);
                 continue;
             }
+            DisableAutoUpdate(start);
 
             TimeSpan next = _interval.Delay;
             try
             {
-                (string stdout, string stderr, int exitCode) = await RunAsync(start, token);
+                (string stdout, string stderr, int exitCode) = await RunAsync(start, RunTimeout, token);
                 next = Handle(stdout, stderr, exitCode);
             }
             catch (OperationCanceledException) when (token.IsCancellationRequested)
@@ -128,10 +132,49 @@ public sealed class AntigravityProvider : IUsageProvider
 
             if (!_halted)
             {
+                await UpdateCliIfDueAsync(token);
                 await Wait(next, token);
             }
         }
     }
+
+    /// <summary>
+    /// Replaces the disabled background updater. Runs between usage queries so the two never overlap,
+    /// and inside the hidden console of <see cref="CommandLocator"/> so no window opens.
+    /// A failed update only waits for the next attempt; it never affects the usage display.
+    /// </summary>
+    private async Task UpdateCliIfDueAsync(CancellationToken token)
+    {
+        DateTimeOffset now = DateTimeOffset.UtcNow;
+        if (!UpdateDue(_lastUpdate, now, UpdateInterval) ||
+            CommandLocator.Build("agy", "update") is not { } start)
+        {
+            return;
+        }
+        _lastUpdate = now;
+        DisableAutoUpdate(start);
+        try
+        {
+            await RunAsync(start, UpdateTimeout, token);
+        }
+        catch (Exception ex) when (ex is IOException or InvalidOperationException or TimeoutException
+                                       or System.ComponentModel.Win32Exception)
+        {
+        }
+        catch (OperationCanceledException) when (token.IsCancellationRequested)
+        {
+        }
+    }
+
+    internal static bool UpdateDue(DateTimeOffset? last, DateTimeOffset now, TimeSpan interval) =>
+        last is not { } previous || now - previous >= interval;
+
+    /// <summary>
+    /// Stops the CLI's background updater for this query only. On Windows the updater starts
+    /// <c>agy --version</c> with a visible console, which opens a terminal window that takes the keyboard focus.
+    /// </summary>
+    internal static void DisableAutoUpdate(ProcessStartInfo start) =>
+        start.Environment["AGY_CLI_DISABLE_AUTO_UPDATE"] = "true";
 
     private TimeSpan Handle(string stdout, string stderr, int exitCode)
     {
@@ -181,7 +224,7 @@ public sealed class AntigravityProvider : IUsageProvider
         Publish(new ProviderSnapshot(Id, ProviderState.Ok, group.FiveHour, group.Weekly, updated, Label: group.Name));
     }
 
-    private static async Task<(string Stdout, string Stderr, int ExitCode)> RunAsync(ProcessStartInfo start, CancellationToken token)
+    private static async Task<(string Stdout, string Stderr, int ExitCode)> RunAsync(ProcessStartInfo start, TimeSpan timeout, CancellationToken token)
     {
         start.RedirectStandardInput = true; // No terminal, so the CLI never starts an interactive sign-in.
         start.RedirectStandardOutput = true;
@@ -195,7 +238,7 @@ public sealed class AntigravityProvider : IUsageProvider
         Task<string> stderr = process.StandardError.ReadToEndAsync(token);
         try
         {
-            await process.WaitForExitAsync(token).WaitAsync(RunTimeout, token);
+            await process.WaitForExitAsync(token).WaitAsync(timeout, token);
         }
         catch (TimeoutException)
         {

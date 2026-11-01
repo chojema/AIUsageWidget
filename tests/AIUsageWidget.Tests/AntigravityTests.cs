@@ -93,6 +93,24 @@ public class AntigravityUsageParserTests
     }
 
     [Fact]
+    public void Usage_queries_disable_the_background_updater()
+    {
+        var start = new System.Diagnostics.ProcessStartInfo("agy");
+        AntigravityProvider.DisableAutoUpdate(start);
+        Assert.Equal("true", start.Environment["AGY_CLI_DISABLE_AUTO_UPDATE"]);
+    }
+
+    [Fact]
+    public void Cli_update_runs_at_start_and_then_after_each_interval()
+    {
+        var now = new DateTimeOffset(2026, 11, 1, 12, 0, 0, TimeSpan.Zero);
+        TimeSpan day = TimeSpan.FromHours(24);
+        Assert.True(AntigravityProvider.UpdateDue(null, now, day));
+        Assert.False(AntigravityProvider.UpdateDue(now.AddHours(-23), now, day));
+        Assert.True(AntigravityProvider.UpdateDue(now.AddHours(-24), now, day));
+    }
+
+    [Fact]
     public void Posix_quoting_keeps_slash_arguments_literal()
     {
         Assert.Equal("'/usage'", CommandLocator.PosixQuote("/usage"));
