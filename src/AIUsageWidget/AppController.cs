@@ -412,16 +412,21 @@ public sealed class AppController : IDisposable, ISettingsHost
 
     public bool ClaudeConnected => ClaudeIntegration.IsInstalled();
 
-    public bool StartAtLoginSupported => OperatingSystem.IsWindows();
+    public bool StartAtLoginSupported => OperatingSystem.IsWindows() || OperatingSystem.IsMacOS();
 
     public bool StartAtLogin
     {
-        get => OperatingSystem.IsWindows() && WindowsStartup.IsEnabled();
+        get => OperatingSystem.IsWindows() ? WindowsStartup.IsEnabled() :
+               OperatingSystem.IsMacOS() && MacStartup.IsEnabled();
         set
         {
             if (OperatingSystem.IsWindows())
             {
                 WindowsStartup.SetEnabled(value);
+            }
+            else if (OperatingSystem.IsMacOS())
+            {
+                MacStartup.SetEnabled(value);
             }
             BuildTray();
         }

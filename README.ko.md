@@ -10,13 +10,13 @@
 
 ## 다운로드 및 설치
 
-[**0.0.13 다운로드**](https://github.com/chojema/AIUsageWidget/releases/tag/v0.0.13)
+[**0.0.14 다운로드**](https://github.com/chojema/AIUsageWidget/releases/tag/v0.0.14)
 
 | 플랫폼 | 파일 |
 |---|---|
 | Windows x64 | [AIUsageWidget-0.0.13-win-x64.zip](https://github.com/chojema/AIUsageWidget/releases/download/v0.0.13/AIUsageWidget-0.0.13-win-x64.zip) |
-| macOS Apple Silicon(M 시리즈) | [AIUsageWidget-0.0.12-osx-arm64.zip](https://github.com/chojema/AIUsageWidget/releases/download/v0.0.12/AIUsageWidget-0.0.12-osx-arm64.zip) |
-| macOS Intel | [AIUsageWidget-0.0.12-osx-x64.zip](https://github.com/chojema/AIUsageWidget/releases/download/v0.0.12/AIUsageWidget-0.0.12-osx-x64.zip) |
+| macOS Apple Silicon(M 시리즈) | [AIUsageWidget-0.0.14-osx-arm64.zip](https://github.com/chojema/AIUsageWidget/releases/download/v0.0.14/AIUsageWidget-0.0.14-osx-arm64.zip) |
+| macOS Intel | [AIUsageWidget-0.0.14-osx-x64.zip](https://github.com/chojema/AIUsageWidget/releases/download/v0.0.14/AIUsageWidget-0.0.14-osx-x64.zip) |
 
 - **Windows:** 계속 사용할 폴더에 압축을 풀고 `AIUsageWidget.exe`를 실행합니다. 보조창 우클릭 메뉴 또는 트레이 메뉴에서 설정, 새로 고침, 숨기기, 종료를 선택합니다.
 - **macOS 14 이상:** 압축을 풀고 `AIUsageWidget.app`을 `/Applications`로 옮겨 실행합니다. 메뉴 막대 아이콘에서 설정을 엽니다. Dock 아이콘은 없습니다.
@@ -41,7 +41,7 @@ Windows Terminal, Terminal, iTerm2, WezTerm, Alacritty, Ghostty, Warp 등을 지
 
 Windows에서는 터미널이 1초 동안 전면 상태를 유지한 뒤 보조창을 표시합니다. 다른 터미널로 전환하면 대기 시간을 다시 계산합니다.
 
-**↻**로 새로 고치고 **✕**로 보조창을 숨기거나 앱을 종료합니다. 숨긴 보조창은 트레이·메뉴 막대 메뉴의 **보조창 다시 표시**로 복원합니다. 표시 항목, 언어, 갱신 및 닫기 동작은 **설정**에서 바꿉니다. 로그인 시 자동 실행은 Windows에서만 지원합니다.
+**↻**로 새로 고치고 **✕**로 보조창을 숨기거나 앱을 종료합니다. 숨긴 보조창은 트레이·메뉴 막대 메뉴의 **보조창 다시 표시**로 복원합니다. 표시 항목, 언어, 갱신 및 닫기 동작은 **설정**에서 바꿉니다. 로그인 시 자동 실행은 Windows와 macOS에서 지원합니다.
 
 ## CLI 연결
 

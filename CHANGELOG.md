@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.0.14 — 2026-11-04
+
+- On macOS, add **Start at login** to Settings. It registers the app at its current location; if you move the app, turn the option off and on again.
+- macOS Apple Silicon / Intel downloads only. Windows is unchanged; keep using 0.0.13.
+
 ## 0.0.13 — 2026-11-01
 
 - On Windows, stop terminal windows from briefly opening and taking keyboard focus. The Antigravity CLI's background updater caused them when the widget checked usage.

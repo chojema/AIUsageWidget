@@ -10,13 +10,13 @@ See your Codex, Claude Code and Antigravity usage limits below your terminal or 
 
 ## Download and install
 
-[**Download 0.0.13**](https://github.com/chojema/AIUsageWidget/releases/tag/v0.0.13)
+[**Download 0.0.14**](https://github.com/chojema/AIUsageWidget/releases/tag/v0.0.14)
 
 | Platform | File |
 |---|---|
 | Windows x64 | [AIUsageWidget-0.0.13-win-x64.zip](https://github.com/chojema/AIUsageWidget/releases/download/v0.0.13/AIUsageWidget-0.0.13-win-x64.zip) |
-| macOS Apple Silicon (M-series) | [AIUsageWidget-0.0.12-osx-arm64.zip](https://github.com/chojema/AIUsageWidget/releases/download/v0.0.12/AIUsageWidget-0.0.12-osx-arm64.zip) |
-| macOS Intel | [AIUsageWidget-0.0.12-osx-x64.zip](https://github.com/chojema/AIUsageWidget/releases/download/v0.0.12/AIUsageWidget-0.0.12-osx-x64.zip) |
+| macOS Apple Silicon (M-series) | [AIUsageWidget-0.0.14-osx-arm64.zip](https://github.com/chojema/AIUsageWidget/releases/download/v0.0.14/AIUsageWidget-0.0.14-osx-arm64.zip) |
+| macOS Intel | [AIUsageWidget-0.0.14-osx-x64.zip](https://github.com/chojema/AIUsageWidget/releases/download/v0.0.14/AIUsageWidget-0.0.14-osx-x64.zip) |
 
 - **Windows:** extract to a permanent folder and run `AIUsageWidget.exe`. Right-click the panel or use the tray menu for Settings, refresh, hide, and quit.
 - **macOS 14+:** extract, move `AIUsageWidget.app` to `/Applications`, and open it. Open Settings from the menu bar icon; the app has no Dock icon.
@@ -41,7 +41,7 @@ Supported terminals include Windows Terminal, Terminal, iTerm2, WezTerm, Alacrit
 
 On Windows, the terminal must stay in front for one second before the panel appears. Switching terminals starts a fresh delay.
 
-Use **↻** to refresh and **✕** to hide the panel or quit. Restore a hidden panel with **Show panel** in the tray/menu bar menu. Appearance, language, refresh and close behavior are available in **Settings**. Start at login is available on Windows only.
+Use **↻** to refresh and **✕** to hide the panel or quit. Restore a hidden panel with **Show panel** in the tray/menu bar menu. Appearance, language, refresh and close behavior are available in **Settings**. Start at login is available on Windows and macOS.
 
 ## Connect your CLIs
 
