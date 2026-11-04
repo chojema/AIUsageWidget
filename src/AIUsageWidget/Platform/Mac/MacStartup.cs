@@ -52,15 +52,11 @@ public static class MacStartup
     /// <summary>The .app bundle that contains the executable, or null when it does not run from a bundle.</summary>
     internal static string? FindBundle(string executablePath)
     {
-        // <bundle>.app/Contents/MacOS/<executable>
-        string? macOs = Path.GetDirectoryName(executablePath);
-        string? contents = macOs is null ? null : Path.GetDirectoryName(macOs);
-        string? bundle = contents is null ? null : Path.GetDirectoryName(contents);
-        return bundle is not null &&
-               bundle.EndsWith(".app", StringComparison.OrdinalIgnoreCase) &&
-               string.Equals(Path.GetFileName(macOs), "MacOS", StringComparison.Ordinal) &&
-               string.Equals(Path.GetFileName(contents), "Contents", StringComparison.Ordinal)
-            ? bundle
+        // <bundle>.app/Contents/MacOS/<executable>. macOS paths use '/', so parse them the same on every OS.
+        const string marker = ".app/Contents/MacOS/";
+        int index = executablePath.LastIndexOf(marker, StringComparison.OrdinalIgnoreCase);
+        return index > 0 && executablePath.IndexOf('/', index + marker.Length) < 0
+            ? executablePath[..(index + ".app".Length)]
             : null;
     }
 
