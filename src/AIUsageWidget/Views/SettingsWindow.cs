@@ -34,6 +34,8 @@ public interface ISettingsHost
     void SetAntigravityGroup(string group);
     /// <summary>Returns an error message, or null on success.</summary>
     string? SetClaudeConnected(bool connected);
+    /// <summary>Opens a web page in the default browser.</summary>
+    void OpenUrl(string url);
 }
 
 public sealed class SettingsWindow : Window
@@ -43,6 +45,7 @@ public sealed class SettingsWindow : Window
 
     private readonly ISettingsHost _host;
     private bool _building;
+    private int _claudeErrorIndex;
 
     public SettingsWindow(ISettingsHost host)
     {
@@ -324,7 +327,7 @@ public sealed class SettingsWindow : Window
             Build();
             if (error is not null && Content is ScrollViewer { Content: StackPanel panel })
             {
-                panel.Children.Insert(panel.Children.Count - 1, new TextBlock
+                panel.Children.Insert(_claudeErrorIndex, new TextBlock
                 {
                     Text = string.Format(_host.Strings.ClaudeConnectFailed, error),
                     Foreground = ErrorBrush,
@@ -334,6 +337,13 @@ public sealed class SettingsWindow : Window
         };
         root.Children.Add(claudeStatus);
         root.Children.Add(claudeButton);
+        _claudeErrorIndex = root.Children.Count;
+
+        // About
+        root.Children.Add(Heading(s.AboutSection));
+        root.Children.Add(new TextBlock { Text = $"{AppInfo.Name} {AppInfo.Version}" });
+        root.Children.Add(Link(s.AboutRepository, AppInfo.RepositoryUrl));
+        root.Children.Add(Link(s.AboutAppPark, AppInfo.AppParkUrl));
 
         var close = new Button
         {
@@ -366,6 +376,14 @@ public sealed class SettingsWindow : Window
         FontSize = 14,
         Margin = new Thickness(0, 10, 0, 2),
     };
+
+    private HyperlinkButton Link(string text, string url)
+    {
+        var link = new HyperlinkButton { Content = text, Padding = new Thickness(0, 2) };
+        ToolTip.SetTip(link, url);
+        link.Click += (_, _) => _host.OpenUrl(url);
+        return link;
+    }
 
     private static TextBlock Hint(string text) => new()
     {

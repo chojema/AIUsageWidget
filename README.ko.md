@@ -10,13 +10,13 @@
 
 ## 다운로드 및 설치
 
-[**0.0.14 다운로드**](https://github.com/chojema/AIUsageWidget/releases/tag/v0.0.14)
+[**0.0.15 다운로드**](https://github.com/chojema/AIUsageWidget/releases/tag/v0.0.15)
 
 | 플랫폼 | 파일 |
 |---|---|
-| Windows x64 | [AIUsageWidget-0.0.13-win-x64.zip](https://github.com/chojema/AIUsageWidget/releases/download/v0.0.13/AIUsageWidget-0.0.13-win-x64.zip) |
-| macOS Apple Silicon(M 시리즈) | [AIUsageWidget-0.0.14-osx-arm64.zip](https://github.com/chojema/AIUsageWidget/releases/download/v0.0.14/AIUsageWidget-0.0.14-osx-arm64.zip) |
-| macOS Intel | [AIUsageWidget-0.0.14-osx-x64.zip](https://github.com/chojema/AIUsageWidget/releases/download/v0.0.14/AIUsageWidget-0.0.14-osx-x64.zip) |
+| Windows x64 | [AIUsageWidget-0.0.15-win-x64.zip](https://github.com/chojema/AIUsageWidget/releases/download/v0.0.15/AIUsageWidget-0.0.15-win-x64.zip) |
+| macOS Apple Silicon(M 시리즈) | [AIUsageWidget-0.0.15-osx-arm64.zip](https://github.com/chojema/AIUsageWidget/releases/download/v0.0.15/AIUsageWidget-0.0.15-osx-arm64.zip) |
+| macOS Intel | [AIUsageWidget-0.0.15-osx-x64.zip](https://github.com/chojema/AIUsageWidget/releases/download/v0.0.15/AIUsageWidget-0.0.15-osx-x64.zip) |
 
 - **Windows:** 계속 사용할 폴더에 압축을 풀고 `AIUsageWidget.exe`를 실행합니다. 보조창 우클릭 메뉴 또는 트레이 메뉴에서 설정, 새로 고침, 숨기기, 종료를 선택합니다.
 - **macOS 14 이상:** 압축을 풀고 `AIUsageWidget.app`을 `/Applications`로 옮겨 실행합니다. 메뉴 막대 아이콘에서 설정을 엽니다. Dock 아이콘은 없습니다.

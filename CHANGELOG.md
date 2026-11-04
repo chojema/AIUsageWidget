@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.0.15 — 2026-11-04
+
+- Add an **About** section to Settings with the app version and links to the GitHub repository and Chojema App Park.
+- Windows x64 and macOS Apple Silicon / Intel downloads.
+
 ## 0.0.14 — 2026-11-04
 
 - On macOS, add **Start at login** to Settings. It registers the app at its current location; if you move the app, turn the option off and on again.

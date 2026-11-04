@@ -94,7 +94,10 @@ public sealed class Strings
         weekdayTitle: "Day",
         timeTitle: "Time",
         monthDayFormat: "MMM d",
-        days: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]);
+        days: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+        aboutSection: "About",
+        aboutRepository: "GitHub repository",
+        aboutAppPark: "Chojema App Park");
 
     public static Strings Korean { get; } = new(
         code: "ko",
@@ -184,14 +187,17 @@ public sealed class Strings
         weekdayTitle: "요일",
         timeTitle: "시각",
         monthDayFormat: "M월 d일",
-        days: ["일", "월", "화", "수", "목", "금", "토"]);
+        days: ["일", "월", "화", "수", "목", "금", "토"],
+        aboutSection: "정보",
+        aboutRepository: "GitHub 저장소",
+        aboutAppPark: "Chojema App Park");
 
     private Strings(string code, string fiveHour, string weekly, string left, string resets, string resetsIn,
         string hours, string minutes, string updatedAgo, string justNow, string notInstalled, string notSignedIn,
         string notConnected, string waiting, string waitingClaude, string unsupported, string error, string starting,
         string menuLanguage, string menuSystemLanguage, string menuConnectClaude, string menuDisconnectClaude,
         string menuStartAtLogin, string menuRefresh, string menuOpenProject, string menuQuit,
-        string claudeConnectFailed, string menuSettings, string settingsTitle, string displayMode, string modeTerminal, string modeTerminalHint, string modeWidget, string modeWidgetHint, string widgetTopmost, string showIme, string claudeSection, string claudeConnected, string claudeDisconnected, string connect, string disconnect, string general, string close, string imeTitle, string antigravityHalted, string antigravitySection, string antigravityGroup, string antigravityGroupHint, string antigravityGroupsPending, string refreshSection, string refreshInterval, string refreshManual, string refreshOneMinute, string refreshFiveMinutes, string refreshThirtyMinutes, string refreshOneHour, string refreshCustom, string minutesUnit, string refreshHint, string refreshManualHint, string closeButtonAction, string closeAsk, string closeHide, string closeQuit, string closePrompt, string closeHideButton, string closeQuitButton, string cancel, string menuShowPanel, string closeTooltip, string used, string sectionsHeading, string sectionsHint, string moveUp, string moveDown, string sectionDate, string sectionWeekday, string sectionTime, string sectionIme, string showSeconds, string usageDisplay, string usageRemaining, string usageUsed, string dateTitle, string weekdayTitle, string timeTitle, string monthDayFormat, string[] days)
+        string claudeConnectFailed, string menuSettings, string settingsTitle, string displayMode, string modeTerminal, string modeTerminalHint, string modeWidget, string modeWidgetHint, string widgetTopmost, string showIme, string claudeSection, string claudeConnected, string claudeDisconnected, string connect, string disconnect, string general, string close, string imeTitle, string antigravityHalted, string antigravitySection, string antigravityGroup, string antigravityGroupHint, string antigravityGroupsPending, string refreshSection, string refreshInterval, string refreshManual, string refreshOneMinute, string refreshFiveMinutes, string refreshThirtyMinutes, string refreshOneHour, string refreshCustom, string minutesUnit, string refreshHint, string refreshManualHint, string closeButtonAction, string closeAsk, string closeHide, string closeQuit, string closePrompt, string closeHideButton, string closeQuitButton, string cancel, string menuShowPanel, string closeTooltip, string used, string sectionsHeading, string sectionsHint, string moveUp, string moveDown, string sectionDate, string sectionWeekday, string sectionTime, string sectionIme, string showSeconds, string usageDisplay, string usageRemaining, string usageUsed, string dateTitle, string weekdayTitle, string timeTitle, string monthDayFormat, string[] days, string aboutSection, string aboutRepository, string aboutAppPark)
     {
         Code = code;
         FiveHour = fiveHour;
@@ -281,6 +287,9 @@ public sealed class Strings
         TimeTitle = timeTitle;
         MonthDayFormat = monthDayFormat;
         Days = days;
+        AboutSection = aboutSection;
+        AboutRepository = aboutRepository;
+        AboutAppPark = aboutAppPark;
     }
 
     public string Code { get; }
@@ -372,6 +381,9 @@ public sealed class Strings
     public string TimeTitle { get; }
     public string MonthDayFormat { get; }
     public string[] Days { get; }
+    public string AboutSection { get; }
+    public string AboutRepository { get; }
+    public string AboutAppPark { get; }
 
     /// <summary>Resolves a setting value ("system", "en", "ko") to a string table.</summary>
     public static Strings For(string setting) => setting switch

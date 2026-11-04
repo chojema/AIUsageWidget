@@ -626,6 +626,8 @@ public sealed class AppController : IDisposable, ISettingsHost
         return new WindowIcon(stream);
     }
 
+    void ISettingsHost.OpenUrl(string url) => OpenUrl(url);
+
     private static void OpenUrl(string url)
     {
         try

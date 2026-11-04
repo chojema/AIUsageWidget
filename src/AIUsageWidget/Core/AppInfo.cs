@@ -8,6 +8,8 @@ public static class AppInfo
 
     public const string RepositoryUrl = "https://github.com/chojema/AIUsageWidget";
 
+    public const string AppParkUrl = "https://chojema.github.io/AppPark/";
+
     public static string Version { get; } =
         typeof(AppInfo).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion
             .Split('+')[0]
