@@ -79,8 +79,52 @@ public class AntigravityUsageParserTests
         Assert.Equal("Claude and GPT models", AntigravityUsageParser.Select(groups, "Claude and GPT models")!.Name);
         Assert.Equal("Gemini Models", AntigravityUsageParser.Select(groups, null)!.Name);
         Assert.Equal("Gemini Models", AntigravityUsageParser.Select(groups, "Removed group")!.Name);
-        Assert.Equal("Gemini 4 Argon", AntigravityUsageParser.Select(groups.Skip(2).ToList(), "Gemini Models")!.Name);
+        Assert.Null(AntigravityUsageParser.Select(groups.Skip(2).ToList(), "Gemini Models"));
         Assert.Null(AntigravityUsageParser.Select([], null));
+    }
+
+    [Fact]
+    public void One_response_publishes_Gemini_and_Argon_as_separate_limits()
+    {
+        using var provider = new AntigravityProvider("Gemini 4 Argon");
+        provider.Handle(Output, "", 0);
+
+        Assert.Equal("Gemini Models", provider.Current.Label);
+        Assert.Equal(25, provider.Current.FiveHour!.RemainingPercent, 3);
+        Assert.Equal("Gemini Models", provider.ShownGroup);
+        Assert.DoesNotContain("Gemini 4 Argon", provider.GroupNames);
+        Assert.Equal("Gemini 4 Argon", provider.Argon.Label);
+        Assert.Null(provider.Argon.FiveHour);
+        Assert.Equal(90, provider.Argon.Weekly!.RemainingPercent, 3);
+        Assert.Equal(provider.Current.UpdatedAt, provider.Argon.UpdatedAt);
+
+        provider.SelectGroup("Claude and GPT models");
+        Assert.Equal(50, provider.Current.FiveHour!.RemainingPercent, 3);
+        Assert.Equal(90, provider.Argon.Weekly!.RemainingPercent, 3);
+
+        provider.Handle("not json", "", 1);
+        Assert.Equal(AIUsageWidget.Core.ProviderState.Error, provider.Argon.State);
+        Assert.Null(provider.Argon.Weekly);
+    }
+
+    [Fact]
+    public void Missing_Argon_is_unavailable_and_an_Argon_only_response_still_updates()
+    {
+        using var provider = new AntigravityProvider(null);
+        provider.Handle(Output.Replace("Gemini 4 Argon", "Other Models"), "", 0);
+        Assert.Equal(AIUsageWidget.Core.ProviderState.WaitingForData, provider.Argon.State);
+        Assert.Null(provider.Argon.Weekly);
+
+        var root = System.Text.Json.Nodes.JsonNode.Parse(Output)!;
+        var groups = (System.Text.Json.Nodes.JsonArray)root["command"]!["data"]!["groups"]!;
+        groups.RemoveAt(0);
+        groups.RemoveAt(0);
+        int changes = 0;
+        provider.Changed += _ => changes++;
+        provider.Handle(root.ToJsonString(new System.Text.Json.JsonSerializerOptions { WriteIndented = false }), "", 0);
+        Assert.Equal(AIUsageWidget.Core.ProviderState.WaitingForData, provider.Current.State);
+        Assert.Equal(AIUsageWidget.Core.ProviderState.Ok, provider.Argon.State);
+        Assert.Equal(1, changes);
     }
 
     [Theory]

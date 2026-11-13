@@ -37,6 +37,9 @@ public sealed class AntigravityProvider : IUsageProvider
 
     public ProviderSnapshot Current { get; private set; } = ProviderSnapshot.Of(ProviderId.Antigravity, ProviderState.Starting);
 
+    public ProviderSnapshot Argon { get; private set; } = new(ProviderId.Antigravity,
+        ProviderState.Starting, Label: AntigravityUsageParser.ArgonGroup);
+
     public event Action<ProviderSnapshot>? Changed;
 
     /// <summary>Group names from the last successful read, in the CLI's order.</summary>
@@ -46,7 +49,7 @@ public sealed class AntigravityProvider : IUsageProvider
         {
             lock (_gate)
             {
-                return _groups.Select(g => g.Name).ToList();
+                return _groups.Where(g => g.Name != AntigravityUsageParser.ArgonGroup).Select(g => g.Name).ToList();
             }
         }
     }
@@ -176,7 +179,7 @@ public sealed class AntigravityProvider : IUsageProvider
     internal static void DisableAutoUpdate(ProcessStartInfo start) =>
         start.Environment["AGY_CLI_DISABLE_AUTO_UPDATE"] = "true";
 
-    private TimeSpan Handle(string stdout, string stderr, int exitCode)
+    internal TimeSpan Handle(string stdout, string stderr, int exitCode)
     {
         var (status, groups) = AntigravityUsageParser.Parse(stdout);
         switch (status)
@@ -208,21 +211,20 @@ public sealed class AntigravityProvider : IUsageProvider
 
     private void PublishGroups()
     {
-        AntigravityGroup? group;
-        DateTimeOffset? updated;
+        ProviderSnapshot main;
+        ProviderSnapshot argon;
         lock (_gate)
         {
-            group = AntigravityUsageParser.Select(_groups, _selectedGroup);
-            updated = _updatedAt;
+            main = SnapshotFor(AntigravityUsageParser.Select(_groups, _selectedGroup));
+            argon = SnapshotFor(_groups.FirstOrDefault(g => g.Name == AntigravityUsageParser.ArgonGroup),
+                AntigravityUsageParser.ArgonGroup);
         }
-
-        if (group is null || (group.FiveHour is null && group.Weekly is null))
-        {
-            Publish(new ProviderSnapshot(Id, ProviderState.WaitingForData, Label: group?.Name));
-            return;
-        }
-        Publish(new ProviderSnapshot(Id, ProviderState.Ok, group.FiveHour, group.Weekly, updated, Label: group.Name));
+        Publish(main, argon);
     }
+
+    private ProviderSnapshot SnapshotFor(AntigravityGroup? group, string? label = null) =>
+        new(Id, group?.FiveHour is null && group?.Weekly is null ? ProviderState.WaitingForData : ProviderState.Ok,
+            group?.FiveHour, group?.Weekly, _updatedAt, Label: group?.Name ?? label);
 
     private static async Task<(string Stdout, string Stderr, int ExitCode)> RunAsync(ProcessStartInfo start, TimeSpan timeout, CancellationToken token)
     {
@@ -259,13 +261,15 @@ public sealed class AntigravityProvider : IUsageProvider
         }
     }
 
-    private void Publish(ProviderSnapshot snapshot)
+    private void Publish(ProviderSnapshot snapshot, ProviderSnapshot? argon = null)
     {
-        if (snapshot == Current)
+        argon ??= snapshot with { FiveHour = null, Weekly = null, Label = AntigravityUsageParser.ArgonGroup };
+        if (snapshot == Current && argon == Argon)
         {
             return;
         }
         Current = snapshot;
+        Argon = argon;
         Changed?.Invoke(snapshot);
     }
 

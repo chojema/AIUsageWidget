@@ -16,6 +16,7 @@ public sealed partial class PanelWindow : Window
     private static readonly TimeSpan PromptTimeout = TimeSpan.FromSeconds(8);
 
     private readonly Dictionary<ProviderId, ProviderCell> _providers = new();
+    private readonly ProviderCell _argon = new(ProviderId.Antigravity);
     private readonly Dictionary<SectionId, BadgeCell> _badges = new()
     {
         [SectionId.Date] = new BadgeCell(64),
@@ -138,7 +139,8 @@ public sealed partial class PanelWindow : Window
                 _cells.ColumnDefinitions.Add(new ColumnDefinition(new GridLength(bothProviders ? 16 : 8)));
             }
 
-            Control cell = SectionLayout.ProviderOf(id) is { } provider ? _providers[provider] : _badges[id];
+            Control cell = id == SectionId.AntigravityArgon ? _argon
+                : SectionLayout.ProviderOf(id) is { } provider ? _providers[provider] : _badges[id];
             _cells.ColumnDefinitions.Add(new ColumnDefinition(
                 SectionLayout.IsProvider(id) ? new GridLength(1, GridUnitType.Star) : GridLength.Auto));
             Grid.SetColumn(cell, _cells.ColumnDefinitions.Count - 1);
@@ -162,7 +164,8 @@ public sealed partial class PanelWindow : Window
         _cells.Children.Add(_buttons);
     }
 
-    public void Render(IEnumerable<ProviderSnapshot> snapshots, Strings strings, DateTimeOffset now, UsageDisplay display)
+    public void Render(IEnumerable<ProviderSnapshot> snapshots, Strings strings, DateTimeOffset now, UsageDisplay display,
+        ProviderSnapshot? argon = null)
     {
         foreach (ProviderSnapshot snapshot in snapshots)
         {
@@ -170,6 +173,11 @@ public sealed partial class PanelWindow : Window
             {
                 cell.Render(snapshot, strings, now, display);
             }
+        }
+
+        if (argon is not null)
+        {
+            _argon.Render(argon, strings, now, display);
         }
 
         ToolTip.SetTip(_closeButton, strings.CloseTooltip);

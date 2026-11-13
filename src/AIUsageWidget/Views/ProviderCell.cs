@@ -26,10 +26,11 @@ public sealed class ProviderCell : Grid
     private readonly TextBlock _status;
     private readonly Row _fiveHour;
     private readonly Row _weekly;
+    private readonly Row _credits;
 
     public ProviderCell(ProviderId provider)
     {
-        RowDefinitions = new RowDefinitions("Auto,Auto,Auto");
+        RowDefinitions = new RowDefinitions("Auto,Auto,Auto,Auto");
         VerticalAlignment = VerticalAlignment.Center;
 
         _provider = provider;
@@ -50,6 +51,11 @@ public sealed class ProviderCell : Grid
         _weekly = new Row();
         SetRow(_weekly.Panel, 2);
         Children.Add(_weekly.Panel);
+
+        _credits = new Row();
+        _credits.Panel.IsVisible = false;
+        SetRow(_credits.Panel, 3);
+        Children.Add(_credits.Panel);
     }
 
     public void Render(ProviderSnapshot snapshot, Strings s, DateTimeOffset now, UsageDisplay display)
@@ -58,6 +64,8 @@ public sealed class ProviderCell : Grid
             ? $"{Strings.ProviderName(_provider)} · {AntigravityUsageParser.ShortName(label)}"
             : Strings.ProviderName(_provider);
 
+        _fiveHour.Panel.IsVisible = snapshot.State != ProviderState.Ok || snapshot.Label != AntigravityUsageParser.ArgonGroup;
+        _credits.Panel.IsVisible = _provider == ProviderId.Codex && snapshot.State == ProviderState.Ok;
         if (snapshot.State != ProviderState.Ok)
         {
             _status.Text = string.Empty;
@@ -71,6 +79,11 @@ public sealed class ProviderCell : Grid
             : string.Empty;
         _fiveHour.Show(s.FiveHour, snapshot.FiveHour, s, now, display);
         _weekly.Show(s.Weekly, snapshot.Weekly, s, now, display);
+        if (_credits.Panel.IsVisible)
+        {
+            _credits.ShowValue(s.Credits, UsageFormatter.Credits(snapshot.Credits, s));
+            ToolTip.SetTip(_credits.Panel, snapshot.Credits is null ? s.CreditsUnavailable : null);
+        }
     }
 
     private static TextBlock Text(string text, IBrush brush, FontWeight weight = FontWeight.Normal) => new()
@@ -133,6 +146,15 @@ public sealed class ProviderCell : Grid
             _fill.Background = remaining > 50 ? Good : remaining > 20 ? Warn : Low;
             string reset = UsageFormatter.Reset(window, now, s);
             _value.Text = reset.Length > 0 ? $"{UsageFormatter.Percent(window, s, display)} · {reset}" : UsageFormatter.Percent(window, s, display);
+            _value.Foreground = Primary;
+        }
+
+        public void ShowValue(string label, string value)
+        {
+            _label.Text = label;
+            _label.IsVisible = true;
+            _track.IsVisible = false;
+            _value.Text = value;
             _value.Foreground = Primary;
         }
 

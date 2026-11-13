@@ -26,6 +26,7 @@ public enum AntigravityParseStatus
 public static class AntigravityUsageParser
 {
     public const string DefaultGroup = "Gemini Models";
+    public const string ArgonGroup = "Gemini 4 Argon";
 
     public static (AntigravityParseStatus Status, IReadOnlyList<AntigravityGroup> Groups) Parse(string output)
     {
@@ -106,11 +107,11 @@ public static class AntigravityUsageParser
         return (AntigravityParseStatus.Ok, result);
     }
 
-    /// <summary>The selected group, else the default group, else the first group.</summary>
+    /// <summary>The selected main group, else Gemini, else the first non-Argon group. Argon has its own section.</summary>
     public static AntigravityGroup? Select(IReadOnlyList<AntigravityGroup> groups, string? selected) =>
-        groups.FirstOrDefault(g => g.Name == selected)
+        groups.FirstOrDefault(g => g.Name == selected && g.Name != ArgonGroup)
         ?? groups.FirstOrDefault(g => g.Name == DefaultGroup)
-        ?? groups.FirstOrDefault();
+        ?? groups.FirstOrDefault(g => g.Name != ArgonGroup);
 
     /// <summary>Short form for the panel title: "Gemini Models" becomes "Gemini".</summary>
     public static string ShortName(string groupName)

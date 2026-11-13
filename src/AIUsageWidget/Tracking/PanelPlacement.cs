@@ -2,7 +2,7 @@ namespace AIUsageWidget.Tracking;
 
 public static class PanelPlacement
 {
-    public const double PanelHeightDip = 52;
+    public const double PanelHeightDip = 66;
     public const double MinimumWidthDip = 360;
     public const double WidgetWidthDip = 1060;
 

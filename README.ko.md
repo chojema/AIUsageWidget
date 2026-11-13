@@ -10,13 +10,13 @@
 
 ## 다운로드 및 설치
 
-[**0.0.15 다운로드**](https://github.com/chojema/AIUsageWidget/releases/tag/v0.0.15)
+[**0.0.16 다운로드**](https://github.com/chojema/AIUsageWidget/releases/tag/v0.0.16)
 
 | 플랫폼 | 파일 |
 |---|---|
-| Windows x64 | [AIUsageWidget-0.0.15-win-x64.zip](https://github.com/chojema/AIUsageWidget/releases/download/v0.0.15/AIUsageWidget-0.0.15-win-x64.zip) |
-| macOS Apple Silicon(M 시리즈) | [AIUsageWidget-0.0.15-osx-arm64.zip](https://github.com/chojema/AIUsageWidget/releases/download/v0.0.15/AIUsageWidget-0.0.15-osx-arm64.zip) |
-| macOS Intel | [AIUsageWidget-0.0.15-osx-x64.zip](https://github.com/chojema/AIUsageWidget/releases/download/v0.0.15/AIUsageWidget-0.0.15-osx-x64.zip) |
+| Windows x64 | [AIUsageWidget-0.0.16-win-x64.zip](https://github.com/chojema/AIUsageWidget/releases/download/v0.0.16/AIUsageWidget-0.0.16-win-x64.zip) |
+| macOS Apple Silicon(M 시리즈) | [AIUsageWidget-0.0.16-osx-arm64.zip](https://github.com/chojema/AIUsageWidget/releases/download/v0.0.16/AIUsageWidget-0.0.16-osx-arm64.zip) |
+| macOS Intel | [AIUsageWidget-0.0.16-osx-x64.zip](https://github.com/chojema/AIUsageWidget/releases/download/v0.0.16/AIUsageWidget-0.0.16-osx-x64.zip) |
 
 - **Windows:** 계속 사용할 폴더에 압축을 풀고 `AIUsageWidget.exe`를 실행합니다. 보조창 우클릭 메뉴 또는 트레이 메뉴에서 설정, 새로 고침, 숨기기, 종료를 선택합니다.
 - **macOS 14 이상:** 압축을 풀고 `AIUsageWidget.app`을 `/Applications`로 옮겨 실행합니다. 메뉴 막대 아이콘에서 설정을 엽니다. Dock 아이콘은 없습니다.
@@ -28,6 +28,8 @@
 
 - 5시간·주간 사용량 한도, 초기화 시각과 남은 시간 표시
 - 남은 비율 또는 사용한 비율과 막대 표시
+- Antigravity Gemini와 Argon을 별도 섹션에 표시하며, Argon은 독립적인 주간 한도를 표시
+- 조회 가능한 경우 Codex 크레딧 잔액 표시. Claude 크레딧 잔액은 현재 지원하지 않음
 - 날짜, 요일, 시각(초 선택), EN / 한 등 키보드 입력 상태 표시
 - 설정에서 섹션 표시·숨김 및 순서 변경
 - 자동 갱신(기본 5분), 사용자 지정 주기 또는 수동 갱신
@@ -49,7 +51,7 @@ Windows에서는 터미널이 1초 동안 전면 상태를 유지한 뒤 보조�
 |---|---|
 | Codex | Codex CLI에 로그인합니다. |
 | Claude Code | 트레이·메뉴 막대 메뉴에서 **Claude Code 연결**을 선택합니다. |
-| Antigravity | Antigravity CLI(1.1.12 이상)에 로그인하고 설정에서 모델 그룹을 고릅니다. |
+| Antigravity | Antigravity CLI(1.1.12 이상)에 로그인하고 설정에서 기본 모델 그룹을 고릅니다. Argon은 별도로 표시됩니다. |
 
 Claude Code를 연결하기 전에 앱을 계속 사용할 위치에 두세요. 연결 시 `~/.claude/settings.json`의 `statusLine`을 변경하고 파일을 백업하며, 기존 상태 표시줄은 유지합니다. 연결을 해제하면 이전 설정으로 복원합니다. Claude Code 값은 세션이 실행 중일 때만 갱신됩니다.
 

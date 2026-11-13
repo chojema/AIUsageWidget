@@ -34,6 +34,9 @@ public sealed record UsageWindow(double UsedPercent, DateTimeOffset? ResetsAt)
     public bool HasExpired(DateTimeOffset now) => ResetsAt is { } r && r <= now;
 }
 
+/// <summary>A credit count returned by the service, separate from time-window quotas and currency.</summary>
+public sealed record CreditBalance(decimal? Balance, bool Unlimited = false);
+
 public sealed record ProviderSnapshot(
     ProviderId Provider,
     ProviderState State,
@@ -41,7 +44,8 @@ public sealed record ProviderSnapshot(
     UsageWindow? Weekly = null,
     DateTimeOffset? UpdatedAt = null,
     string? Detail = null,
-    string? Label = null)
+    string? Label = null,
+    CreditBalance? Credits = null)
 {
     public static ProviderSnapshot Of(ProviderId id, ProviderState state, string? detail = null) =>
         new(id, state, Detail: detail);

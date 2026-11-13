@@ -13,6 +13,15 @@ public static class UsageFormatter
         ? string.Format(CultureInfo.InvariantCulture, s.Used, Math.Round(Math.Clamp(window.UsedPercent, 0, 100)))
         : Remaining(window, s);
 
+    public static string Credits(CreditBalance? credits, Strings s) => credits switch
+    {
+        { Unlimited: true } => s.Unlimited,
+        { Balance: 0 } => "0",
+        { Balance: > 0 and < 0.01m } => "<0.01",
+        { Balance: { } balance } => balance.ToString("#,0.##", CultureInfo.InvariantCulture),
+        _ => "—",
+    };
+
     public static string Date(DateTimeOffset now, Strings s) =>
         now.ToLocalTime().ToString(s.MonthDayFormat, CultureInfo.GetCultureInfo(s.Code));
 

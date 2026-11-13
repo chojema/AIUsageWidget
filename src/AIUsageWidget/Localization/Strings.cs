@@ -54,7 +54,7 @@ public sealed class Strings
         antigravityHalted: "Stopped: unexpected CLI output",
         antigravitySection: "Antigravity",
         antigravityGroup: "Model group",
-        antigravityGroupHint: "Each group has its own 5-hour and weekly limits. The list comes from the CLI.",
+        antigravityGroupHint: "Each group has separate limits. Argon is shown in its own section with its weekly limit.",
         antigravityGroupsPending: "Groups appear after the first successful read.",
         refreshSection: "Refresh",
         refreshInterval: "Update interval",
@@ -147,7 +147,7 @@ public sealed class Strings
         antigravityHalted: "중지됨: CLI 출력이 예상과 다름",
         antigravitySection: "Antigravity",
         antigravityGroup: "모델 그룹",
-        antigravityGroupHint: "그룹마다 5시간 한도와 주간 한도가 따로 있습니다. 목록은 CLI에서 받아 옵니다.",
+        antigravityGroupHint: "그룹별 한도는 서로 다릅니다. Argon은 별도 섹션에 주간 한도를 표시합니다.",
         antigravityGroupsPending: "처음 한도를 읽은 뒤에 그룹 목록이 나타납니다.",
         refreshSection: "갱신",
         refreshInterval: "갱신 주기",
@@ -362,6 +362,9 @@ public sealed class Strings
     public string Cancel { get; }
     public string MenuShowPanel { get; }
     public string MenuHidePanel => Code == "ko" ? "보조창 숨기기" : "Hide panel";
+    public string Credits => Code == "ko" ? "크레딧" : "Credits";
+    public string Unlimited => Code == "ko" ? "무제한" : "Unlimited";
+    public string CreditsUnavailable => Code == "ko" ? "크레딧 잔액을 조회할 수 없습니다." : "Credit balance unavailable.";
     public string CloseTooltip { get; }
     public string Used { get; }
     public string SectionsHeading { get; }
@@ -406,6 +409,7 @@ public sealed class Strings
         SectionId.Codex => ProviderName(ProviderId.Codex),
         SectionId.ClaudeCode => ProviderName(ProviderId.ClaudeCode),
         SectionId.Antigravity => ProviderName(ProviderId.Antigravity),
+        SectionId.AntigravityArgon => "Antigravity · Argon",
         SectionId.Date => SectionDate,
         SectionId.Weekday => SectionWeekday,
         SectionId.Time => SectionTime,

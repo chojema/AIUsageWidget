@@ -45,12 +45,12 @@ public class SectionLayoutTests
 
         List<SectionSetting> sections = SectionLayout.Normalize(saved);
 
-        Assert.Equal(7, sections.Count);
+        Assert.Equal(8, sections.Count);
         Assert.Equal(SectionId.Ime, sections[0].Id);
         Assert.Equal(SectionId.Codex, sections[1].Id);
         Assert.False(sections[1].Visible);
         Assert.Equal(SectionId.ClaudeCode, sections[2].Id); // follows Codex as in the default order
-        Assert.Equal(7, sections.Select(s => s.Id).Distinct().Count());
+        Assert.Equal(8, sections.Select(s => s.Id).Distinct().Count());
     }
 
     [Fact]
@@ -64,7 +64,7 @@ public class SectionLayoutTests
 
         var ids = SectionLayout.Normalize(older).Select(s => s.Id).ToList();
 
-        Assert.Equal([SectionId.Antigravity, SectionId.Date, SectionId.Weekday, SectionId.Time,
+        Assert.Equal([SectionId.Antigravity, SectionId.AntigravityArgon, SectionId.Date, SectionId.Weekday, SectionId.Time,
                       SectionId.Codex, SectionId.ClaudeCode, SectionId.Ime], ids);
     }
 
@@ -86,7 +86,18 @@ public class SectionLayoutTests
         sections.First(s => s.Id == SectionId.Antigravity).Visible = false;
 
         Assert.DoesNotContain(SectionId.Antigravity, SectionLayout.Visible(sections));
-        Assert.Equal(6, SectionLayout.Visible(sections).Count);
+        Assert.Equal(7, SectionLayout.Visible(sections).Count);
+    }
+
+    [Fact]
+    public void Argon_inherits_hidden_Antigravity_on_upgrade_and_keeps_its_own_saved_choice()
+    {
+        var saved = new[] { new SectionSetting { Id = SectionId.Antigravity, Visible = false } };
+        var sections = SectionLayout.Normalize(saved);
+        Assert.False(sections.Single(s => s.Id == SectionId.AntigravityArgon).Visible);
+        sections.Single(s => s.Id == SectionId.AntigravityArgon).Visible = true;
+        Assert.True(SectionLayout.Normalize(sections).Single(s => s.Id == SectionId.AntigravityArgon).Visible);
+        Assert.True(SectionLayout.IsProvider(SectionId.AntigravityArgon));
     }
 
     [Fact]
@@ -113,6 +124,17 @@ public class UsageDisplayAndClockTests
         Assert.Equal("38% used", UsageFormatter.Percent(window, Strings.English, UsageDisplay.Used));
         Assert.Equal("38% 사용", UsageFormatter.Percent(window, Strings.Korean, UsageDisplay.Used));
         Assert.Equal("100% used", UsageFormatter.Percent(new UsageWindow(130, null), Strings.English, UsageDisplay.Used));
+    }
+
+    [Fact]
+    public void Credits_distinguish_zero_unavailable_unlimited_and_small_balances()
+    {
+        Assert.Equal("—", UsageFormatter.Credits(null, Strings.English));
+        Assert.Equal("0", UsageFormatter.Credits(new CreditBalance(0), Strings.English));
+        Assert.Equal("50.65", UsageFormatter.Credits(new CreditBalance(50.650494m), Strings.English));
+        Assert.Equal("<0.01", UsageFormatter.Credits(new CreditBalance(0.001m), Strings.English));
+        Assert.Equal("Unlimited", UsageFormatter.Credits(new CreditBalance(null, true), Strings.English));
+        Assert.Equal("무제한", UsageFormatter.Credits(new CreditBalance(null, true), Strings.Korean));
     }
 
     [Fact]

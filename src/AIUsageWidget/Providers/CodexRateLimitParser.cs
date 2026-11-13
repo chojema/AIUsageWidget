@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text.Json.Nodes;
 using AIUsageWidget.Core;
 
@@ -49,6 +50,22 @@ public static class CodexRateLimitParser
     {
         var (fiveHour, weekly) = Parse(update);
         return (fiveHour ?? current.FiveHour, weekly ?? current.Weekly);
+    }
+
+    public static CreditBalance? ParseCredits(JsonNode? snapshot)
+    {
+        if (snapshot is not JsonObject root || root["credits"] is not JsonObject credits)
+        {
+            return null;
+        }
+        if (credits["unlimited"] is JsonValue u && u.TryGetValue(out bool unlimited) && unlimited)
+        {
+            return new CreditBalance(null, Unlimited: true);
+        }
+        return credits["balance"] is JsonValue b && b.TryGetValue(out string? text) &&
+               decimal.TryParse(text, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out decimal balance) && balance >= 0
+            ? new CreditBalance(balance)
+            : null;
     }
 
     internal enum WindowKind { Unknown, FiveHour, Weekly }

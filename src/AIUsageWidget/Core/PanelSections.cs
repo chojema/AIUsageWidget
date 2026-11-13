@@ -13,6 +13,7 @@ public enum SectionId
     Weekday,
     Time,
     Ime,
+    AntigravityArgon,
 }
 
 public sealed class SectionSetting
@@ -27,18 +28,18 @@ public static class SectionLayout
     /// <summary>The order used before the user changes anything.</summary>
     public static IReadOnlyList<SectionId> DefaultOrder { get; } =
     [
-        SectionId.Codex, SectionId.ClaudeCode, SectionId.Antigravity,
+        SectionId.Codex, SectionId.ClaudeCode, SectionId.Antigravity, SectionId.AntigravityArgon,
         SectionId.Date, SectionId.Weekday, SectionId.Time, SectionId.Ime,
     ];
 
     public static bool IsProvider(SectionId id) =>
-        id is SectionId.Codex or SectionId.ClaudeCode or SectionId.Antigravity;
+        id is SectionId.Codex or SectionId.ClaudeCode or SectionId.Antigravity or SectionId.AntigravityArgon;
 
     public static ProviderId? ProviderOf(SectionId id) => id switch
     {
         SectionId.Codex => ProviderId.Codex,
         SectionId.ClaudeCode => ProviderId.ClaudeCode,
-        SectionId.Antigravity => ProviderId.Antigravity,
+        SectionId.Antigravity or SectionId.AntigravityArgon => ProviderId.Antigravity,
         _ => null,
     };
 
@@ -68,6 +69,10 @@ public static class SectionLayout
                 continue;
             }
             bool visible = id != SectionId.Ime || !fresh || legacyShowIme;
+            if (id == SectionId.AntigravityArgon)
+            {
+                visible = result.FirstOrDefault(s => s.Id == SectionId.Antigravity)?.Visible ?? true;
+            }
             // Place it right after the nearest section that precedes it in the default order.
             int after = -1;
             for (int j = i - 1; j >= 0 && after < 0; j--)

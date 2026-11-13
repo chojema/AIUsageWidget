@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.0.16 — 2026-11-13
+
+- Show Antigravity Gemini and Argon limits together in separate sections. Argon shows its weekly limit and can be hidden or reordered in Settings.
+- Show the Codex credit balance when provided by the signed-in account. An unavailable balance is shown as a dash, separately from a zero balance.
+
 ## 0.0.15 — 2026-11-04
 
 - Add an **About** section to Settings with the app version and links to the GitHub repository and Chojema App Park.

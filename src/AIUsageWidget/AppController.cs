@@ -339,7 +339,7 @@ public sealed class AppController : IDisposable, ISettingsHost
         {
             return; // Keep collecting data without updating a hidden window.
         }
-        _panel.Render(_providers.Select(p => p.Current), _strings, DateTimeOffset.Now, _settings.UsageDisplay);
+        _panel.Render(_providers.Select(p => p.Current), _strings, DateTimeOffset.Now, _settings.UsageDisplay, _antigravity.Argon);
         _panel.RenderIme(_imeLabel, _strings);
         RenderClock(beforeShow);
     }

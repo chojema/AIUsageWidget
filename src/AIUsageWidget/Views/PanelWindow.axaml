@@ -10,7 +10,7 @@
         Focusable="False"
         Background="Transparent"
         TransparencyLevelHint="Transparent"
-        Width="640" Height="52">
+        Width="640" Height="66">
   <Window.Styles>
     <Style Selector="Button.panel">
       <Setter Property="Width" Value="20" />

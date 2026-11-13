@@ -23,6 +23,7 @@ public sealed class CodexProvider : IUsageProvider
     private Process? _process;
     private long _nextId;
     private (UsageWindow? FiveHour, UsageWindow? Weekly) _windows;
+    private CreditBalance? _credits;
 
     public ProviderId Id => ProviderId.Codex;
 
@@ -127,7 +128,7 @@ public sealed class CodexProvider : IUsageProvider
         }
     }
 
-    private void HandleReadResponse(JsonObject response)
+    internal void HandleReadResponse(JsonObject response)
     {
         if (response["error"] is JsonObject error)
         {
@@ -139,26 +140,33 @@ public sealed class CodexProvider : IUsageProvider
             return;
         }
 
-        _windows = CodexRateLimitParser.Parse(response["result"]?["rateLimits"]);
+        JsonNode? snapshot = response["result"]?["rateLimits"];
+        _windows = CodexRateLimitParser.Parse(snapshot);
+        _credits = CodexRateLimitParser.ParseCredits(snapshot);
         PublishWindows();
     }
 
-    private void HandleNotification(JsonObject message)
+    internal void HandleNotification(JsonObject message)
     {
         if (message["method"]?.GetValue<string>() != "account/rateLimits/updated")
         {
             return;
         }
-        _windows = CodexRateLimitParser.Merge(_windows, message["params"]?["rateLimits"]);
+        JsonNode? snapshot = message["params"]?["rateLimits"];
+        _windows = CodexRateLimitParser.Merge(_windows, snapshot);
+        if (snapshot is JsonObject obj && obj.ContainsKey("credits"))
+        {
+            _credits = CodexRateLimitParser.ParseCredits(snapshot);
+        }
         PublishWindows();
     }
 
     private void PublishWindows()
     {
         var (fiveHour, weekly) = _windows;
-        Publish(fiveHour is null && weekly is null
+        Publish(fiveHour is null && weekly is null && _credits is null
             ? ProviderSnapshot.Of(Id, ProviderState.WaitingForData)
-            : new ProviderSnapshot(Id, ProviderState.Ok, fiveHour, weekly, DateTimeOffset.Now));
+            : new ProviderSnapshot(Id, ProviderState.Ok, fiveHour, weekly, DateTimeOffset.Now, Credits: _credits));
     }
 
     private async Task ReadLoopAsync(Process process, CancellationToken token)

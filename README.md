@@ -10,13 +10,13 @@ See your Codex, Claude Code and Antigravity usage limits below your terminal or 
 
 ## Download and install
 
-[**Download 0.0.15**](https://github.com/chojema/AIUsageWidget/releases/tag/v0.0.15)
+[**Download 0.0.16**](https://github.com/chojema/AIUsageWidget/releases/tag/v0.0.16)
 
 | Platform | File |
 |---|---|
-| Windows x64 | [AIUsageWidget-0.0.15-win-x64.zip](https://github.com/chojema/AIUsageWidget/releases/download/v0.0.15/AIUsageWidget-0.0.15-win-x64.zip) |
-| macOS Apple Silicon (M-series) | [AIUsageWidget-0.0.15-osx-arm64.zip](https://github.com/chojema/AIUsageWidget/releases/download/v0.0.15/AIUsageWidget-0.0.15-osx-arm64.zip) |
-| macOS Intel | [AIUsageWidget-0.0.15-osx-x64.zip](https://github.com/chojema/AIUsageWidget/releases/download/v0.0.15/AIUsageWidget-0.0.15-osx-x64.zip) |
+| Windows x64 | [AIUsageWidget-0.0.16-win-x64.zip](https://github.com/chojema/AIUsageWidget/releases/download/v0.0.16/AIUsageWidget-0.0.16-win-x64.zip) |
+| macOS Apple Silicon (M-series) | [AIUsageWidget-0.0.16-osx-arm64.zip](https://github.com/chojema/AIUsageWidget/releases/download/v0.0.16/AIUsageWidget-0.0.16-osx-arm64.zip) |
+| macOS Intel | [AIUsageWidget-0.0.16-osx-x64.zip](https://github.com/chojema/AIUsageWidget/releases/download/v0.0.16/AIUsageWidget-0.0.16-osx-x64.zip) |
 
 - **Windows:** extract to a permanent folder and run `AIUsageWidget.exe`. Right-click the panel or use the tray menu for Settings, refresh, hide, and quit.
 - **macOS 14+:** extract, move `AIUsageWidget.app` to `/Applications`, and open it. Open Settings from the menu bar icon; the app has no Dock icon.
@@ -28,6 +28,8 @@ No separate .NET installation is needed. Windows may show a SmartScreen warning 
 
 - 5-hour and weekly usage limits, reset times and time remaining.
 - Remaining or used percentages, with progress bars.
+- Antigravity Gemini and Argon in separate sections; Argon has its own weekly limit.
+- Codex credit balance when available. Claude credit balances are not currently supported.
 - Date, weekday, time (optional seconds) and keyboard input indicator, including EN / 한.
 - Show, hide and reorder sections in Settings.
 - Automatic refresh (every 5 minutes by default), custom intervals or manual refresh.
@@ -49,7 +51,7 @@ Use **↻** to refresh and **✕** to hide the panel or quit. Restore a hidden p
 |---|---|
 | Codex | Sign in to Codex CLI. |
 | Claude Code | Choose **Connect Claude Code** in the tray/menu bar menu. |
-| Antigravity | Sign in to Antigravity CLI (1.1.12+). Select a model group in Settings. |
+| Antigravity | Sign in to Antigravity CLI (1.1.12+). Select the main model group in Settings; Argon is shown separately. |
 
 Place the app in a permanent location before connecting Claude Code. Connecting updates `statusLine` in `~/.claude/settings.json`, backs up the file and preserves your existing status line. Disconnecting restores the previous setting. Claude Code values update only while a session is running.
 

@@ -53,6 +53,76 @@ public class CodexRateLimitParserTests
         Assert.Equal(20, merged.Weekly!.UsedPercent);
     }
 
+    [Theory]
+    [InlineData("0", "0")]
+    [InlineData("50.6504940000", "50.6504940000")]
+    public void Reads_credit_balance_without_converting_it_to_currency(string balance, string expected)
+    {
+        var snapshot = new JsonObject { ["credits"] = new JsonObject
+        {
+            ["hasCredits"] = balance != "0", ["unlimited"] = false, ["balance"] = balance,
+        } };
+
+        Assert.Equal(decimal.Parse(expected, System.Globalization.CultureInfo.InvariantCulture),
+            CodexRateLimitParser.ParseCredits(snapshot)!.Balance);
+    }
+
+    [Fact]
+    public void Unlimited_credits_do_not_require_a_numeric_balance()
+    {
+        var credits = CodexRateLimitParser.ParseCredits(JsonNode.Parse(
+            """{"credits":{"hasCredits":true,"unlimited":true,"balance":null}}"""));
+
+        Assert.True(credits!.Unlimited);
+        Assert.Null(credits.Balance);
+    }
+
+    [Theory]
+    [InlineData("null")]
+    [InlineData("{}")]
+    [InlineData("""{"credits":null}""")]
+    [InlineData("""{"credits":{"balance":null}}""")]
+    [InlineData("""{"credits":{"balance":"invalid"}}""")]
+    [InlineData("""{"credits":{"balance":"-1"}}""")]
+    [InlineData("""{"credits":{"balance":false}}""")]
+    public void Unknown_or_invalid_credits_are_not_reported_as_zero(string json)
+    {
+        Assert.Null(CodexRateLimitParser.ParseCredits(JsonNode.Parse(json)));
+    }
+
+    [Fact]
+    public void Credit_updates_keep_missing_values_but_clear_an_explicitly_unavailable_balance()
+    {
+        using var provider = new CodexProvider();
+        provider.HandleReadResponse((JsonObject)JsonNode.Parse("""
+            {"result":{"rateLimits":{"primary":{"usedPercent":10,"windowDurationMins":300},
+              "credits":{"hasCredits":true,"unlimited":false,"balance":"50.65"}}}}
+            """)!);
+        Assert.Equal(50.65m, provider.Current.Credits!.Balance);
+        provider.HandleNotification((JsonObject)JsonNode.Parse("""
+            {"method":"account/rateLimits/updated","params":{"rateLimits":{
+              "primary":{"usedPercent":20,"windowDurationMins":300}}}}
+            """)!);
+        Assert.Equal(50.65m, provider.Current.Credits!.Balance);
+        Assert.Equal(20, provider.Current.FiveHour!.UsedPercent);
+        provider.HandleNotification((JsonObject)JsonNode.Parse("""
+            {"method":"account/rateLimits/updated","params":{"rateLimits":{"credits":null}}}
+            """)!);
+        Assert.Null(provider.Current.Credits);
+        Assert.Equal(20, provider.Current.FiveHour!.UsedPercent);
+    }
+
+    [Fact]
+    public void Credit_only_accounts_can_still_publish_a_known_zero_balance()
+    {
+        using var provider = new CodexProvider();
+        provider.HandleReadResponse((JsonObject)JsonNode.Parse("""
+            {"result":{"rateLimits":{"credits":{"hasCredits":false,"unlimited":false,"balance":"0"}}}}
+            """)!);
+        Assert.Equal(AIUsageWidget.Core.ProviderState.Ok, provider.Current.State);
+        Assert.Equal(0m, provider.Current.Credits!.Balance);
+    }
+
     [Fact]
     public void Null_snapshot_yields_nothing()
     {

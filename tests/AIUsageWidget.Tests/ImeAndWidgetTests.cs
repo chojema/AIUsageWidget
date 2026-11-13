@@ -53,7 +53,7 @@ public class WidgetPlacementTests
         ScreenRect rect = PanelPlacement.Widget(null, null, [Primary], Primary, 1.0);
 
         Assert.Equal(1920 - 1060 - 16, rect.X);
-        Assert.Equal(1040 - 52 - 16, rect.Y);
+        Assert.Equal(1040 - 66 - 16, rect.Y);
         Assert.Equal(1060, rect.Width);
     }
 
@@ -68,7 +68,7 @@ public class WidgetPlacementTests
     [Fact]
     public void Pulls_a_saved_position_back_inside_the_screen()
     {
-        ScreenRect rect = PanelPlacement.Widget(1084, 1012, [Primary], Primary, 1.0);
+        ScreenRect rect = PanelPlacement.Widget(1084, 1000, [Primary], Primary, 1.0);
 
         Assert.Equal(Primary.Right - 1060, rect.X);
         Assert.True(rect.Bottom <= Primary.Bottom);

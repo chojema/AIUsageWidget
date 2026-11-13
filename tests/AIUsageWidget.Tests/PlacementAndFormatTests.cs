@@ -13,7 +13,7 @@ public class PanelPlacementTests
     {
         var rect = PanelPlacement.Compute(new TerminalWindow(new ScreenRect(100, 100, 800, 500), Work, 1.0));
 
-        Assert.Equal(new ScreenRect(100, 600, 800, 52), rect);
+        Assert.Equal(new ScreenRect(100, 600, 800, 66), rect);
     }
 
     [Fact]
@@ -21,7 +21,7 @@ public class PanelPlacementTests
     {
         var rect = PanelPlacement.Compute(new TerminalWindow(Work, Work, 1.0));
 
-        Assert.Equal(1040 - 52, rect.Y);
+        Assert.Equal(1040 - 66, rect.Y);
         Assert.Equal(1920, rect.Width);
     }
 
@@ -30,7 +30,7 @@ public class PanelPlacementTests
     {
         var rect = PanelPlacement.Compute(new TerminalWindow(new ScreenRect(0, 0, 1000, 400), new ScreenRect(0, 0, 3840, 2080), 2.0));
 
-        Assert.Equal(104, rect.Height);
+        Assert.Equal(132, rect.Height);
         Assert.Equal(400, rect.Y);
     }
 
